@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+"""
+GLM分析结果 - 批次9-10 (评价161-200)
+"""
+
+analysis_results = [
+    # 批次9 (161-180)
+    {"id": 161, "user_name": "楠羽檬", "rating": "5星", "sentiment": "正向", "issues": ["内容问题-不耐玩", "社交问题-没朋友一起玩"], "summary": "玩过爽局但流程差不多，玩一周腻了退游，身边没朋友一起玩"},
+    {"id": 162, "user_name": "1", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "第一次接触这类游戏体验不错，每个阵营角色都有独特玩法"},
+    {"id": 163, "user_name": "神霖", "rating": "4星", "sentiment": "正向", "issues": ["平衡性问题-好人技能弱", "平衡性问题-狼抱团强"], "summary": "路人局好人难玩狼抱团杀就赢，建议加强侦探殡仪跟踪等好人技能"},
+    {"id": 164, "user_name": "周杰伦", "rating": "1星", "sentiment": "负向", "issues": ["运营问题-活动重复", "运营问题-限定皮肤重复"], "summary": "讽刺游戏，双榜皮肤活动第二个月还是一样的限定皮肤，没脑子的人太多"},
+    {"id": 165, "user_name": "爱", "rating": "4星", "sentiment": "正向", "issues": ["运营问题-维修福利少", "新手问题-解锁门槛低"], "summary": "维修服务器福利少，解锁进阶场问题难度低导致新手不会玩"},
+    {"id": 166, "user_name": "行旅", "rating": "4星", "sentiment": "正向", "issues": [], "summary": "同类竞品中不错的休闲游戏，成人多有脑子有智慧的玩家友好"},
+    {"id": 167, "user_name": "啧啧啧走着走着", "rating": "1星", "sentiment": "负向", "issues": ["环境问题-开局骂人", "运营问题-举报没用"], "summary": "游戏可玩性可以但环境太差开局就骂人，举报没用"},
+    {"id": 168, "user_name": "小懒猫", "rating": "4星", "sentiment": "正向", "issues": ["匹配问题-小脑队友多", "平衡性问题-鹈鹕太强", "功能建议-排位赛模式"], "summary": "建议出排位赛模式，小脑队友太多，鹈鹕和投喂古神紧急任务需削弱"},
+    {"id": 169, "user_name": "奶茶古永", "rating": "5星", "sentiment": "正向", "issues": ["功能建议-赛季称号"], "summary": "建议推理等级每个赛季打上巅峰给独特称号增加动力"},
+    {"id": 170, "user_name": "588888", "rating": "3星", "sentiment": "中性偏负", "issues": ["环境问题-龟男仙女现象"], "summary": "建议设置2排3排更多人开房不能匹配，龟男和仙女已经来了"},
+    {"id": 171, "user_name": "Le serein.", "rating": "4星", "sentiment": "正向", "issues": ["内容建议-上线端游角色", "平衡性问题-巫医太强", "功能建议-自定义定板"], "summary": "建议上线端游经典角色，削弱巫医，自定义增加定板能力"},
+    {"id": 172, "user_name": "yy", "rating": "3星", "sentiment": "中性偏负", "issues": ["技术问题-白屏进不去", "技术问题-间谍bug"], "summary": "游戏白屏进不去卸载重装没用，间谍有环境击杀bug莫名其妙被杀"},
+    {"id": 173, "user_name": "Mr.C", "rating": "5星", "sentiment": "正向", "issues": ["环境问题-社区环境差"], "summary": "游戏好本土化适配可玩性高，但社区环境不好建议整治"},
+    {"id": 174, "user_name": "，", "rating": "4星", "sentiment": "正向", "issues": ["功能问题-等级不能跳过"], "summary": "等级不能一键跳过，平板手机切换设备要一级级升很烦"},
+    {"id": 175, "user_name": "想语", "rating": "4星", "sentiment": "正向", "issues": ["环境问题-贴脸狼"], "summary": "遇到贴脸狼影响环境，呼吁大家遇到贴脸一律顺出"},
+    {"id": 176, "user_name": "是喵喵啊", "rating": "5星", "sentiment": "正向", "issues": ["技术问题-大厅网络卡"], "summary": "好玩人多热闹，但大厅人太多网络优化不好很卡顿"},
+    {"id": 177, "user_name": "上衫绘梨衣", "rating": "5星", "sentiment": "正向", "issues": ["运营问题-活动福利少"], "summary": "国际服转国服环境好一点，福利还行但活动福利少"},
+    {"id": 178, "user_name": "离绪", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "看gemini直播知道的游戏，终于上线等了好久"},
+    {"id": 179, "user_name": "柚子要屯稿不要摸鱼：⃒⃘⃤", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "疫情时入坑端游和朋友玩很久，手游方便不局限电脑，本土化模式贴心"},
+    {"id": 180, "user_name": "技能树持续点满", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "先锋服就和朋友玩很欢乐，手游方便出差也能玩，社交属性不错"},
+    
+    # 批次10 (181-200)
+    {"id": 181, "user_name": "要加班", "rating": "5星", "sentiment": "正向", "issues": ["运营问题-敏感字过多"], "summary": "1月8号敏感字多极度不适9号优化好，游戏玩起来不错很上头"},
+    {"id": 182, "user_name": "地狱好看嘛.", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "看主播玩预约了，收到推送上线了先期待一下"},
+    {"id": 183, "user_name": "🐙 🍊", "rating": "3星", "sentiment": "负向", "issues": ["技术问题-vivo闪退", "运营问题-专注氪金不关注质量"], "summary": "vivo开局闪退点通知叉号就闪退，建议少专注氪金多关注质量"},
+    {"id": 184, "user_name": "野冬", "rating": "4星", "sentiment": "正向", "issues": ["内容问题-玩法单一", "内容问题-规矩套路模板"], "summary": "端游通宵打过，玩法单一有规矩套路模板，回游刚开几把好玩后面腻了"},
+    {"id": 185, "user_name": "佚yyyyyy名", "rating": "4星", "sentiment": "正向", "issues": ["功能建议-单机模式", "社交问题-社恐不敢匹配"], "summary": "游戏好但没朋友社恐不敢匹配路人，希望出单机模式"},
+    {"id": 186, "user_name": "锦天", "rating": "4星", "sentiment": "正向", "issues": ["平衡性问题-工程师星界弱", "内容建议-更新端游身份"], "summary": "可玩度高补偿合理，但身份少工程师星界需加强，尽快更新端游身份"},
+    {"id": 187, "user_name": "一地金币", "rating": "4星", "sentiment": "正向", "issues": [], "summary": "玩过电脑端，端游爆了改手游是早晚的事，规则模式和端游差不多挺好玩的"},
+    {"id": 188, "user_name": "三条野·春姬", "rating": "4星", "sentiment": "正向", "issues": ["个人问题-玩不来推理"], "summary": "锻炼推理思维和狡辩思维专注力，榆木脑袋玩不来感觉玩多心理扭曲"},
+    {"id": 189, "user_name": "62000", "rating": "5星", "sentiment": "正向", "issues": ["环境问题-小学生没礼貌", "匹配建议-年龄段分开"], "summary": "好玩但小学生没礼貌乱叫声音大，建议把年龄段的人分开"},
+    {"id": 190, "user_name": "宜", "rating": "4星", "sentiment": "正向", "issues": ["平衡性问题-观鸟者太强", "平衡性问题-掠夺者太强", "平衡性问题-刺客枪无限制"], "summary": "观鸟者视野远透视太强，掠夺者无减速太强，刺客枪会议没限制，平衡待调整"},
+    {"id": 191, "user_name": "去去去去去去去去去去去去", "rating": "2星", "sentiment": "负向", "issues": ["商业化问题-皮肤满天飞", "功能建议-自定义皮肤", "环境问题-骂人管理差", "商业化问题-圈米严重"], "summary": "建议出自定义皮肤自由搭配，骂人严加管理，别老想着圈米风气变差"},
+    {"id": 192, "user_name": "OYO", "rating": "5星", "sentiment": "正向", "issues": ["功能建议-自定义轮抽", "环境问题-野匹素质参差"], "summary": "拉全女房好玩很多，自定义能轮抽就好了，野匹素质参差不齐"},
+    {"id": 193, "user_name": "QQ用户12259640", "rating": "5星", "sentiment": "正向", "issues": ["运营问题-屏蔽词过多", "社交问题-社交系统不如端游"], "summary": "好玩环境素质好，但屏蔽词多正常词也被屏蔽，社交感没端游舒服"},
+    {"id": 194, "user_name": "独一无二的RPG大神", "rating": "5星", "sentiment": "正向", "issues": ["环境问题-村规占领"], "summary": "疫情时玩通宵天亮，希望国服不会被所谓村规占领"},
+    {"id": 195, "user_name": "1122", "rating": "5星", "sentiment": "正向", "issues": ["内容建议-八人身份给全"], "summary": "建议手游八人身份给全，人多容易出现问题，八人场环境好"},
+    {"id": 196, "user_name": "亦玖菲亦叁", "rating": "2星", "sentiment": "负向", "issues": ["美术问题-角色设计不完整"], "summary": "吐槽鸭子角色设计只有两个球没有其他器官"},
+    {"id": 197, "user_name": "地球OL 差评如潮", "rating": "3星", "sentiment": "中性偏负", "issues": ["新手问题-路线指引不完善"], "summary": "路线指引有问题，鸭子只有破坏点指引不知道鹅的任务点在哪"},
+    {"id": 198, "user_name": "馒头泡菜", "rating": "5星", "sentiment": "正向", "issues": ["平衡性问题-鹅任务太少"], "summary": "游戏制作不错，但鹅方任务有点少鸭子没法发挥，建议多四五个"},
+    {"id": 199, "user_name": "哇哈哈哈哈", "rating": "2星", "sentiment": "负向", "issues": ["环境问题-墙头草玩家多"], "summary": "画风好但里面的人没脑子，一个人说投票几号其他人都跟着投"},
+    {"id": 200, "user_name": "小魈子", "rating": "3星", "sentiment": "中性偏负", "issues": ["平衡性问题-狼人攻击距离长", "平衡性问题-好人难赢"], "summary": "玩狼人赢最多好人没多少能赢，狼人攻击距离比好人长不公平"}
+]
+
+import json
+with open('./output/analysis_batch_9_10.json', 'w', encoding='utf-8') as f:
+    json.dump(analysis_results, f, ensure_ascii=False, indent=2)
+
+print("批次9-10分析完成，共40条")

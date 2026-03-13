@@ -1,0 +1,544 @@
+[
+  {
+    "id": 41,
+    "user_name": "饿了就吃小饼干",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "内容丰富主城热闹，推理过程原汁原味还原端游，国服专属角色有新鲜感"
+  },
+  {
+    "id": 42,
+    "user_name": "山大黑皮研究生",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "有绝对单排模式避免线下报信息，画面流畅发言有序，体验比端游更好"
+  },
+  {
+    "id": 43,
+    "user_name": "曦",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [
+      "操作问题-虚拟摇杆不便"
+    ],
+    "summary": "社交破冰能力强，语音系统戏剧性十足，国服独占角色有趣，虚拟摇杆操作略有不便"
+  },
+  {
+    "id": 44,
+    "user_name": "小敏不是咩咩羊",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "比传统狼人杀更热闹胡闹，中立角色有趣，不确定性和意外感是最大乐趣"
+  },
+  {
+    "id": 45,
+    "user_name": "释慧海",
+    "rating": "3星",
+    "sentiment": "中性偏负",
+    "issues": [
+      "UI问题-页面花里胡哨",
+      "功能问题-筛选不能保存",
+      "内容建议-增加人数",
+      "操作问题-刀人反馈弱"
+    ],
+    "summary": "国服页面花里胡哨筛选不能保存，13人太少建议同步原版16人，刀人没有反馈感"
+  },
+  {
+    "id": 46,
+    "user_name": "M.",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [
+      "环境问题-骂人歧视",
+      "功能建议-举报禁言",
+      "功能建议-关系绑定"
+    ],
+    "summary": "娱乐设施丰富福利良心，但单排容易遇到骂人歧视，建议增加举报禁言和关系绑定功能"
+  },
+  {
+    "id": 47,
+    "user_name": "User334382112",
+    "rating": "3星",
+    "sentiment": "负向",
+    "issues": [
+      "环境问题-愚鹅多",
+      "匹配机制问题"
+    ],
+    "summary": "玩逻辑游戏被愚鹅气死，建议不带脑子玩体验更好，匹配机制需要改进"
+  },
+  {
+    "id": 48,
+    "user_name": "才羽绿",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [
+      "环境问题-场外现象",
+      "功能建议-举报场外"
+    ],
+    "summary": "玩法丰富身份多样，但场外现象存在，建议增加场外举报功能"
+  },
+  {
+    "id": 49,
+    "user_name": "小鲨(shark)",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [
+      "内容问题-互动内容少",
+      "匹配问题-人少难匹配"
+    ],
+    "summary": "类似Among Us但增加了职业和开麦功能，大厅互动内容少匹配人少"
+  },
+  {
+    "id": 50,
+    "user_name": "冷磷",
+    "rating": "1星",
+    "sentiment": "负向",
+    "issues": [
+      "技术问题-bug未修",
+      "环境问题-玩家素质差",
+      "平衡性问题-加拿大鹅",
+      "信誉分系统无效"
+    ],
+    "summary": "星界行者bug好几天不修，玩家素质堪忧骂人扣小孩哥帽子，加拿大鹅被当万金油误投，信誉分系统形同虚设"
+  },
+  {
+    "id": 51,
+    "user_name": "快乐的解谜玩家",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "集社交演技策略于一体的派对游戏，戏精与推理爱好者的狂欢"
+  },
+  {
+    "id": 52,
+    "user_name": "絶",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "机制多样化角色多样化，游戏免费可做活动得皮肤，成年玩家多体验更好"
+  },
+  {
+    "id": 53,
+    "user_name": "开灶",
+    "rating": "4星",
+    "sentiment": "正向",
+    "issues": [
+      "环境问题-井盖狗挂机"
+    ],
+    "summary": "从PC肝到手游的老玩家，玩法进化但每局压缩导致推理链坍缩，工程师井盖挂机现象多"
+  },
+  {
+    "id": 54,
+    "user_name": "往事随風",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "机制多样化角色多样化，地图有不同淘汰机制，成年玩家多体验更好"
+  },
+  {
+    "id": 55,
+    "user_name": "hgh",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "阵营发言策略指南，提供好人鸭子和中立阵营的技巧参考"
+  },
+  {
+    "id": 56,
+    "user_name": "☠惡蝕曼羅",
+    "rating": "1星",
+    "sentiment": "负向",
+    "issues": [
+      "环境问题-玩家素质差",
+      "玩法问题-娱乐模式无聊",
+      "内容问题-推理深度不够"
+    ],
+    "summary": "玩家素质差骂人容忍度低，娱乐模式模仿弹丸论破但无聊，推理深度不够"
+  },
+  {
+    "id": 57,
+    "user_name": "宁静时光",
+    "rating": "1星",
+    "sentiment": "负向",
+    "issues": [
+      "环境问题-玩家智商低",
+      "环境问题-篡改发言",
+      "环境问题-公主舔狗"
+    ],
+    "summary": "90%玩家不带脑子不带眼睛，鱼的记忆纯盲人篡改发言，公主舔狗现象存在"
+  },
+  {
+    "id": 58,
+    "user_name": "任安",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [
+      "环境问题-路人局体验差",
+      "新手问题-角色技能复杂"
+    ],
+    "summary": "游戏体验与队友质量挂钩，路人局像开盲盒，新手需要时间熟悉角色技能"
+  },
+  {
+    "id": 59,
+    "user_name": "AZE",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [
+      "环境问题-房规不统一",
+      "平衡性问题-鸭子难玩"
+    ],
+    "summary": "实时语音区域语音拉近距离，43种身份8张地图，但开麦让鸭子难玩房规不统一"
+  },
+  {
+    "id": 60,
+    "user_name": "顾潼的小跟班",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "游戏角色介绍，三大阵营43个身份各有特色技能"
+  },
+  {
+    "id": 61,
+    "user_name": "某人",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "提供逻辑房开局和重要情况的应对方法参考"
+  },
+  {
+    "id": 62,
+    "user_name": "X",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "看博主玩很搞笑想玩，鸭子形象可爱搞笑，期待上线"
+  },
+  {
+    "id": 63,
+    "user_name": "颜.",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "看直播入坑端游老玩家，手游终于上线可以随时随地玩"
+  },
+  {
+    "id": 64,
+    "user_name": "king",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "三大阵营策略趣味性拉满，画风蠢萌可爱，语音交流方便"
+  },
+  {
+    "id": 65,
+    "user_name": "溶解",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "画风可爱角色丰富，保留狼人杀推理元素又有创新，和朋友玩欢乐加倍"
+  },
+  {
+    "id": 66,
+    "user_name": "空漠",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "每局都是惊喜，尔虞我诈刺激，各种有趣角色充满变数"
+  },
+  {
+    "id": 67,
+    "user_name": "姬野梅川子",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "社交神作互相忽悠的狂欢，熟人开黑效果翻倍，又菜又爱玩"
+  },
+  {
+    "id": 68,
+    "user_name": "语花",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [
+      "技术问题-网络不稳定"
+    ],
+    "summary": "社交氛围超棒语音互动感强，投票有序不乱，Steam版网络不稳定希望手游改善"
+  },
+  {
+    "id": 69,
+    "user_name": "dal",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "疫情时期开始玩的老玩家，公测不用加速器更方便"
+  },
+  {
+    "id": 70,
+    "user_name": "tap且tap66",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "社交推理融合超绝，多种地图带感，适合朋友聚会团建"
+  },
+  {
+    "id": 71,
+    "user_name": "姜来",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "高三暑假的美好回忆，游戏把害怕交流的自己锻炼成沉稳发言的人"
+  },
+  {
+    "id": 72,
+    "user_name": "真的，不骗你",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [
+      "环境问题-高等级欺负新人"
+    ],
+    "summary": "新人房间会被高等级玩家立规则踢人，等级高不代表玩得好"
+  },
+  {
+    "id": 73,
+    "user_name": "四五",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "通过游戏结识各地合拍的朋友，每个角色都有存在意义"
+  },
+  {
+    "id": 74,
+    "user_name": "luaty",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "看B站主播玩入坑，社交属性和推理属性强，推荐给喜欢社交推理的人"
+  },
+  {
+    "id": 75,
+    "user_name": "雪夜随心",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "喜欢多人游戏，画风呆萌可爱身份多样，期待和朋友们一起玩"
+  },
+  {
+    "id": 76,
+    "user_name": "落日",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "Among Us plus，更可爱的造型更低的门槛更高的可玩性"
+  },
+  {
+    "id": 77,
+    "user_name": "Rency",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [
+      "技术问题-网络波动"
+    ],
+    "summary": "经典狼人杀加超萌角色，身份系统丰富，偶尔网络波动但瑕不掩瑜"
+  },
+  {
+    "id": 78,
+    "user_name": "伪人",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "看up主玩感兴趣，比太空杀可爱比狼人杀有乐趣，环境更好"
+  },
+  {
+    "id": 79,
+    "user_name": "JY汲",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [
+      "运营建议-宣传不到位"
+    ],
+    "summary": "Steam老玩家希望手游重振辉煌，建议找高人气up主宣传迎来第二春"
+  },
+  {
+    "id": 80,
+    "user_name": "钟离",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "喜欢多人游戏，画风呆萌可爱身份多样，期待和朋友们一起玩"
+  },
+  {
+    "id": 81,
+    "user_name": "小狼",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "狼人杀和派对游戏结合得天衣无缝，社交体验一流"
+  },
+  {
+    "id": 82,
+    "user_name": "荼梓",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "端游老玩家，手游更方便，衣服好看有创意可以肝"
+  },
+  {
+    "id": 83,
+    "user_name": "風",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "喜欢画风和刀刀出血特效，推理和角色技能让人沉迷"
+  },
+  {
+    "id": 84,
+    "user_name": "执风",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "提供好人思路和开局应对方法参考"
+  },
+  {
+    "id": 85,
+    "user_name": "Always",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "喜欢多人游戏，画风呆萌可爱身份多样，期待和朋友们一起玩"
+  },
+  {
+    "id": 86,
+    "user_name": "Haoo",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "狼人杀爱好者，30多种角色每种技能不同，手游优化操作更方便"
+  },
+  {
+    "id": 87,
+    "user_name": "雾霾",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "喜欢推理类游戏，话语间尔虞我诈猜不透身份，期待手游内测"
+  },
+  {
+    "id": 88,
+    "user_name": "离谱小哥",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "承载欢笑背叛顾虑信任，语言的魅力烧脑时刻，国服终于来了"
+  },
+  {
+    "id": 89,
+    "user_name": "苏北一吱🐏",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "鹅鸭比太空杀机甲可爱一百倍，加拿大鹅设定有趣，期待新角色"
+  },
+  {
+    "id": 90,
+    "user_name": "Joan",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "三大阵营策略趣味性拉满，呆呆鸟开启戏精模式"
+  },
+  {
+    "id": 91,
+    "user_name": "，,",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [
+      "环境问题-村规问题"
+    ],
+    "summary": "手游村规补充：顺序发言、呆呆鸟不能自爆狼、不聊场外等"
+  },
+  {
+    "id": 92,
+    "user_name": "耶",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "第五人格老玩家，阵营对抗勾心斗角更上头，和朋友玩笑到肚子疼"
+  },
+  {
+    "id": 93,
+    "user_name": "旭子害怕青蛙",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "角色设计堪称一绝，超过50种身份每局充满惊喜"
+  },
+  {
+    "id": 94,
+    "user_name": ".",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "用哲学视角分析游戏设计，不完美信息博弈激发创造力"
+  },
+  {
+    "id": 95,
+    "user_name": "JJXX",
+    "rating": "5星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "玩法有趣地图用心，语音交流流畅，社交性强容易交朋友"
+  },
+  {
+    "id": 96,
+    "user_name": "牛游谷GameFun",
+    "rating": "4星",
+    "sentiment": "正向",
+    "issues": [],
+    "summary": "详细游戏介绍，狼人杀like游戏改良版，蠢萌家禽角色"
+  },
+  {
+    "id": 97,
+    "user_name": "90后游戏少年",
+    "rating": "4星",
+    "sentiment": "正向",
+    "issues": [
+      "新手问题-角色理解成本高"
+    ],
+    "summary": "正版授权味儿正，国服独占角色，但角色多理解成本高"
+  },
+  {
+    "id": 98,
+    "user_name": "衫选文学",
+    "rating": "4星",
+    "sentiment": "正向",
+    "issues": [
+      "操作问题-虚拟摇杆劝退",
+      "视野问题-手游视野窄",
+      "平衡性问题-刺客鸭太强",
+      "环境问题-路人局盲盒"
+    ],
+    "summary": "随时随地摸鱼开一把，但操作劝退视野窄跨平台不公平，路人局盲盒体验差"
+  },
+  {
+    "id": 99,
+    "user_name": "嗯.",
+    "rating": "3星",
+    "sentiment": "中性偏负",
+    "issues": [
+      "匹配问题-角色随机性"
+    ],
+    "summary": "玩鸭阵营总是匹配到刺客，想玩别的角色"
+  },
+  {
+    "id": 100,
+    "user_name": "吗喽",
+    "rating": "4星",
+    "sentiment": "正向",
+    "issues": [
+      "原创内容问题-借鉴au"
+    ],
+    "summary": "基本照搬Among Us MOD，原创内容不多但免费有竞争力，官方态度好"
+  }
+]

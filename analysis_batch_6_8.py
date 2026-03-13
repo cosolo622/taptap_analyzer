@@ -1,0 +1,78 @@
+# -*- coding: utf-8 -*-
+"""
+GLM分析结果 - 批次6-8 (评价101-160)
+"""
+
+analysis_results = [
+    # 批次6 (101-120)
+    {"id": 101, "user_name": "因", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "详细的角色技能介绍，涵盖所有阵营角色的玩法说明"},
+    {"id": 102, "user_name": "门狙杀波妞", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "用故事形式展现游戏玩法，有趣的狼人杀场景模拟"},
+    {"id": 103, "user_name": "旷世奇才李狗蛋", "rating": "4星", "sentiment": "正向", "issues": ["技术问题-连接不稳定", "技术问题-语音系统问题"], "summary": "比Among Us更可爱，侧重互动和玩法，和朋友开黑搞笑，但Steam版连接不稳定语音有问题"},
+    {"id": 104, "user_name": "披荆斩棘的二刺猿", "rating": "5星", "sentiment": "正向", "issues": ["技术问题-断连问题", "技术问题-语音问题"], "summary": "人物造型可爱地图玩法丰富，和朋友开黑八百个心眼子，但Steam没加速器断连语音有问题"},
+    {"id": 105, "user_name": "小糊涂", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "玩了一百多小时的角色技能总结介绍"},
+    {"id": 106, "user_name": "风音", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "过年期间玩了12小时，非常上头，玩了400多把"},
+    {"id": 107, "user_name": "哩哩", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "可玩性强，刀多不管是鹅鸭还是中立都有带刀的，挺不错"},
+    {"id": 108, "user_name": "Black fans", "rating": "4星", "sentiment": "中性偏负", "issues": ["匹配问题-自定义刷胜率"], "summary": "自定义房间设置十个任务刷胜率和段位，建议把自定义从段位里挪出去"},
+    {"id": 109, "user_name": "麒翔", "rating": "4星", "sentiment": "正向", "issues": [], "summary": "角色技能介绍总结"},
+    {"id": 110, "user_name": "小灰灰.", "rating": "5星", "sentiment": "正向", "issues": ["技术问题-网速要求高", "技术问题-更新慢"], "summary": "玩法丰富职业特色，但网速要求高朋友总断线，更新几百兆要半小时"},
+    {"id": 111, "user_name": "晖荫", "rating": "4星", "sentiment": "正向", "issues": ["运营问题-充值通道关闭"], "summary": "改进版狼人杀，呆萌画风增添趣味性，平衡性好，但国内代理后关闭Steam充值"},
+    {"id": 112, "user_name": "懒惰の罪", "rating": "5星", "sentiment": "正向", "issues": ["功能建议-录像功能"], "summary": "建议增加游戏自带录像功能，有意思的局没法保存"},
+    {"id": 113, "user_name": "啦啦啦", "rating": "5星", "sentiment": "正向", "issues": ["环境问题-骂人"], "summary": "过年活动多送服装多，和老姐玩很开心，但会遇到骂人的"},
+    {"id": 114, "user_name": "杨", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "房间用来和伙伴聊天挺舒服，比聊天软件多人语音还可互动"},
+    {"id": 115, "user_name": "晴天小猪", "rating": "5星", "sentiment": "正向", "issues": ["平衡性建议-增加普通鹅", "平衡性建议-任务时间太快"], "summary": "建议增加两个普通鹅让鸭子谎报身份，鹅完成任务时间太快"},
+    {"id": 116, "user_name": "Raysuf", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "陌生人语音聊天+游戏太陌生，为了玩清了麦克风孔"},
+    {"id": 117, "user_name": "😶", "rating": "5星", "sentiment": "正向", "issues": ["环境问题-挂机场外骂人", "技术问题-狙击手bug"], "summary": "偶尔遇到挂机场外骂人，狙击手有bug需要修复"},
+    {"id": 118, "user_name": "尘杉", "rating": "3星", "sentiment": "负向", "issues": ["环境问题-玩家素质差", "匹配问题-段位匹配不合理"], "summary": "游戏上瘾但傻子多，匹配机制有问题高段位匹配到垃圾"},
+    {"id": 119, "user_name": "AAA丶B站劳模-烟总", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "TapTap电脑端比Steam好，没有小团体潜规则，随时点开就玩"},
+    {"id": 120, "user_name": "与子忆往", "rating": "5星", "sentiment": "正向", "issues": ["功能建议-段位优化"], "summary": "可玩性高运营到位，但终究是小游戏规模，段位建议多优化"},
+    
+    # 批次7 (121-140)
+    {"id": 121, "user_name": "Like omen", "rating": "4星", "sentiment": "正向", "issues": ["环境问题-陌生人不稳定"], "summary": "游戏还可以，但需要跟熟人玩，陌生人容易匹配到性子暴躁的"},
+    {"id": 122, "user_name": "你莓柿吧", "rating": "4星", "sentiment": "中性偏负", "issues": ["充值问题-自动扣费"], "summary": "打游戏时微信突然多了一笔328自动扣费，想查充值记录"},
+    {"id": 123, "user_name": "往昔恍如梦", "rating": "3星", "sentiment": "中性偏负", "issues": ["隐私问题-展示游戏场数"], "summary": "建议让玩家自由选择是否展示游戏场数，不想被嘲讽玩的多还菜"},
+    {"id": 124, "user_name": "我不想见到你", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "游戏有魔力让人乐在其中，社交游戏里很有代表性"},
+    {"id": 125, "user_name": "手机用户42183210", "rating": "5星", "sentiment": "正向", "issues": ["内容建议-模式常驻"], "summary": "巨好玩，过年有家人保卫战模式，希望这些模式能常驻"},
+    {"id": 126, "user_name": "二白枫", "rating": "4星", "sentiment": "正向", "issues": ["环境问题-傻子多"], "summary": "游戏可以但很多人逻辑不通傻子多，当个乐子玩就行"},
+    {"id": 127, "user_name": "ZJX", "rating": "4星", "sentiment": "正向", "issues": ["技术问题-声音bug"], "summary": "游戏挺好但有bug，游玩时声音变得很槽点"},
+    {"id": 128, "user_name": "双蔗吖", "rating": "3星", "sentiment": "中性", "issues": ["内容问题-不耐玩"], "summary": "好玩但不耐玩，玩多了会腻，和朋友开黑有趣"},
+    {"id": 129, "user_name": "NPK", "rating": "1星", "sentiment": "负向", "issues": ["平衡性问题-任务太短", "平衡性问题-狼任务分布不合理"], "summary": "手游好人任务太短，狼任务分布不合理要么跟好人一样要么全随机"},
+    {"id": 130, "user_name": "手机用户18378139", "rating": "3星", "sentiment": "中性", "issues": ["匹配问题-水平素质不一", "功能建议-排位模式"], "summary": "匹配玩家水平素质不一，建议增加排位模式禁打字提高竞技性"},
+    {"id": 131, "user_name": "拾贰", "rating": "3星", "sentiment": "中性偏负", "issues": ["环境问题-素质低下骂人", "功能建议-禁言惩罚"], "summary": "游戏不错但遇到素质低下的人骂人，建议禁言或暂停游玩惩罚"},
+    {"id": 132, "user_name": "无心莫念", "rating": "1星", "sentiment": "负向", "issues": ["运营问题-封号不作为"], "summary": "一个人都没被封号，功能越来越多但没被和谐"},
+    {"id": 133, "user_name": "大熊硬糖", "rating": "1星", "sentiment": "负向", "issues": ["环境问题-开麦骂人", "运营问题-处罚力度不够"], "summary": "开麦游戏但不加大骂人处罚力度，环境没希望，已退游"},
+    {"id": 134, "user_name": "论我往年的二三事", "rating": "3星", "sentiment": "中性偏负", "issues": ["环境问题-场外爆信息"], "summary": "和朋友玩高兴但容易遇到场外爆信息，一晚上至少两三把"},
+    {"id": 135, "user_name": "孙亮", "rating": "4星", "sentiment": "正向", "issues": [], "summary": "刚玩觉得角色可爱，小东西必须好评"},
+    {"id": 136, "user_name": "Monika", "rating": "5星", "sentiment": "正向", "issues": ["商业化建议-首充太网游", "技术问题-语音麦克风"], "summary": "团队做得完美，但首充太网游语音麦克风需改进队友声音小"},
+    {"id": 137, "user_name": "天，要变了", "rating": "1星", "sentiment": "负向", "issues": ["技术问题-氪金后闪退", "环境问题-野匹水平低"], "summary": "氪金后游戏登不上开屏闪退，适合跟熟人玩野匹水平太低"},
+    {"id": 138, "user_name": "xiezi", "rating": "2星", "sentiment": "负向", "issues": ["环境问题-早晚素质差", "内容问题-单调", "功能建议-定位防骂人"], "summary": "早晚素质不高的人多，游戏单调，建议强制定位防线下骂人"},
+    {"id": 139, "user_name": "绯訇", "rating": "5星", "sentiment": "正向", "issues": ["技术问题-小众手机卡死"], "summary": "小众手机点开就桌面横屏卡死进不去，希望修复"},
+    {"id": 140, "user_name": "吃点橙子吧你", "rating": "5星", "sentiment": "正向", "issues": ["新手问题-角色多玩不明白"], "summary": "新手看过直播觉得好玩，但角色好多玩不明白"},
+    
+    # 批次8 (141-160)
+    {"id": 141, "user_name": "草莓好甜", "rating": "5星", "sentiment": "正向", "issues": ["环境建议-提升环境"], "summary": "考研结束天天玩到凌晨，希望游戏再火一点加新玩法提升环境"},
+    {"id": 142, "user_name": "爪机无力", "rating": "4星", "sentiment": "正向", "issues": ["技术问题-判定距离问题"], "summary": "玩法没问题但判定需优化，被追隔七八步被刀追人两三步追不上"},
+    {"id": 143, "user_name": "Swedns", "rating": "4星", "sentiment": "中性", "issues": ["环境问题-场外无限制", "环境问题-骂人举报没用"], "summary": "适合乐子人神人，但场外无限制骂人举报没用"},
+    {"id": 144, "user_name": "喵", "rating": "3星", "sentiment": "中性偏负", "issues": ["环境问题-素质差", "环境问题-乱分析"], "summary": "女朋友拉我玩挺好，但部分人素质差脑子不好乱分析"},
+    {"id": 145, "user_name": "ye", "rating": "1星", "sentiment": "负向", "issues": ["环境问题-乐园骂人"], "summary": "讽刺游戏，乐园里听别人互相问候家人"},
+    {"id": 146, "user_name": "沈三废", "rating": "2星", "sentiment": "负向", "issues": ["技术问题-网络波动", "环境问题-贴脸场外挂机", "运营问题-举报无反馈"], "summary": "网络波动，贴脸场外挂机举报没反馈，好人胜率低"},
+    {"id": 147, "user_name": "小珂ya", "rating": "3星", "sentiment": "中性偏负", "issues": ["环境问题-言语辱骂"], "summary": "可玩性可以但环境差，言语辱骂的一被踩就破防大骂"},
+    {"id": 148, "user_name": "手机用户64804247", "rating": "5星", "sentiment": "正向", "issues": ["技术问题-更新一堆bug", "商业化问题-扭蛋吃相难看"], "summary": "游戏好认识很多朋友，但每次更新一堆bug，传说扭蛋吃相难看"},
+    {"id": 149, "user_name": "abb的小梨", "rating": "1星", "sentiment": "负向", "issues": ["环境问题-无脑队友", "环境问题-好人帮狼票"], "summary": "容易碰到无脑队友，输赢看队友带不带脑子，好人帮狼票太多"},
+    {"id": 150, "user_name": "User45210014", "rating": "3星", "sentiment": "中性偏负", "issues": ["内容问题-国际服角色未更新", "运营问题-国服特供角色"], "summary": "国际服角色没更新却出特供角色，缺的忍者乌鸦谁补"},
+    {"id": 151, "user_name": "苹果冰人", "rating": "5星", "sentiment": "正向", "issues": ["技术问题-鸿蒙不支持"], "summary": "不支持纯血鸿蒙换了手机只能云玩，问题已解决"},
+    {"id": 152, "user_name": "Liking", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "房规：不骂人不报团不场外，固定时间周日至周五晚9-12点"},
+    {"id": 153, "user_name": "life", "rating": "3星", "sentiment": "中性偏负", "issues": ["技术问题-TapTap版闪退"], "summary": "其他渠道下载不闪退，TapTap下的玩一段时间后闪退进不去"},
+    {"id": 154, "user_name": "CHINESEFOOTBALL", "rating": "4星", "sentiment": "正向", "issues": ["功能建议-排位系统", "匹配问题-水平差距大"], "summary": "手机端流畅氪金克制，建议搞排位系统，匹配水平差距大"},
+    {"id": 155, "user_name": "海仔要睡觉", "rating": "4星", "sentiment": "正向", "issues": [], "summary": "游戏有意思但自己不会说谎承受不住压力，遗憾退场"},
+    {"id": 156, "user_name": "GOTTA Have you", "rating": "4星", "sentiment": "正向", "issues": ["技术问题-系统崩溃闪退"], "summary": "游戏总体好但系统容易崩溃，刚进去闪退结算卡住"},
+    {"id": 157, "user_name": "天天挣大钱", "rating": "4星", "sentiment": "正向", "issues": [], "summary": "社交性大于娱乐性，当能多人玩游戏的微信"},
+    {"id": 158, "user_name": "夜叉TOT", "rating": "5星", "sentiment": "正向", "issues": ["技术问题-服务器卡", "环境问题-玻璃心破防"], "summary": "挺好但服务器差时不时卡，语音文明有些人玻璃心破防"},
+    {"id": 159, "user_name": "你要吃喵吗", "rating": "1星", "sentiment": "负向", "issues": ["环境问题-不会玩搞心态", "环境问题-场外", "环境问题-讲话难听"], "summary": "游戏有意思但不会玩搞心态场外的人太多，讲话难听，退游"},
+    {"id": 160, "user_name": "奶糖坤坤酱", "rating": "5星", "sentiment": "正向", "issues": [], "summary": "最尊重东北人的游戏，抖音刷到直接下载"}
+]
+
+import json
+with open('./output/analysis_batch_6_8.json', 'w', encoding='utf-8') as f:
+    json.dump(analysis_results, f, ensure_ascii=False, indent=2)
+
+print("批次6-8分析完成，共60条")
