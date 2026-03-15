@@ -7,34 +7,42 @@
         <span class="refresh-time">数据更新时间：{{ lastRefreshTime }}</span>
       </div>
       <div class="header-right">
-        <el-dropdown trigger="click" @command="handleGlobalDateCommand">
-          <el-button size="small">
-            <el-icon><Calendar /></el-icon>
-            {{ globalDateLabel }}
-            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="today">今日</el-dropdown-item>
-              <el-dropdown-item command="week">过去7天</el-dropdown-item>
-              <el-dropdown-item command="month">过去30天</el-dropdown-item>
-              <el-dropdown-item command="thisMonth">本月</el-dropdown-item>
-              <el-dropdown-item divided>
-                <el-date-picker
-                  v-model="customDateRange"
-                  type="daterange"
-                  range-separator="至"
-                  start-placeholder="开始"
-                  end-placeholder="结束"
-                  format="YYYY-MM-DD"
-                  value-format="YYYY-MM-DD"
-                  @change="handleCustomDateChange"
-                  style="width: 240px;"
-                />
-              </el-dropdown-item>
-            </el-dropdown-menu>
+        <el-popover
+          placement="bottom"
+          :width="280"
+          trigger="click"
+          v-model:visible="globalDatePopoverVisible"
+        >
+          <template #reference>
+            <el-button size="small">
+              <el-icon><Calendar /></el-icon>
+              {{ globalDateLabel }}
+              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            </el-button>
           </template>
-        </el-dropdown>
+          <div class="date-popover-content">
+            <div class="date-quick-select">
+              <el-button text size="small" @click="handleGlobalDateCommand('today')">今日</el-button>
+              <el-button text size="small" @click="handleGlobalDateCommand('week')">过去7天</el-button>
+              <el-button text size="small" @click="handleGlobalDateCommand('month')">过去30天</el-button>
+              <el-button text size="small" @click="handleGlobalDateCommand('thisMonth')">本月</el-button>
+            </div>
+            <div class="date-custom-select">
+              <span class="date-custom-label">自定义日期：</span>
+              <el-date-picker
+                v-model="customDateRange"
+                type="daterange"
+                range-separator="至"
+                start-placeholder="开始"
+                end-placeholder="结束"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+                @change="handleCustomDateChange"
+                style="width: 240px;"
+              />
+            </div>
+          </div>
+        </el-popover>
         <el-button size="small" @click="refreshData" :loading="isRefreshing">
           <el-icon><Refresh /></el-icon>
           刷新
@@ -429,42 +437,50 @@
       <div class="chart-controls">
         <el-dropdown trigger="click" @command="(cmd) => handleAggregationChange('table', cmd)">
           <el-button size="small">
-            {{ tableAggregation === 'day' ? '按天' : tableAggregation === 'week' ? '按周' : '合计' }}
+            {{ tableAggregation === 'day' ? '按天' : tableAggregation === 'week' ? '按周' : tableAggregation === 'month' ? '按月' : '合计' }}
             <el-icon class="el-icon--right"><ArrowDown /></el-icon>
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="day">按天</el-dropdown-item>
               <el-dropdown-item command="week">按周</el-dropdown-item>
+              <el-dropdown-item command="month">按月</el-dropdown-item>
               <el-dropdown-item command="total">合计</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
-        <el-dropdown trigger="click" @command="(cmd) => handleChartDateChange('table', cmd)">
-          <el-button size="small">
-            {{ tableDateLabel }}
-            <el-icon class="el-icon--right"><ArrowDown /></el-icon>
-          </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="today">今日</el-dropdown-item>
-              <el-dropdown-item command="week">过去7天</el-dropdown-item>
-              <el-dropdown-item command="month">过去30天</el-dropdown-item>
-              <el-dropdown-item>
-                <el-date-picker
-                  v-model="tableCustomDate"
-                  type="daterange"
-                  range-separator="-"
-                  format="MM-DD"
-                  value-format="YYYY-MM-DD"
-                  placeholder="自定义"
-                  @change="handleChartCustomDate('table')"
-                  style="width: 180px;"
-                />
-              </el-dropdown-item>
-            </el-dropdown-menu>
+        <el-popover
+          placement="bottom"
+          :width="260"
+          trigger="click"
+          v-model:visible="tableDatePopoverVisible"
+        >
+          <template #reference>
+            <el-button size="small">
+              {{ tableDateLabel }}
+              <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+            </el-button>
           </template>
-        </el-dropdown>
+          <div class="date-popover-content">
+            <div class="date-quick-select">
+              <el-button text size="small" @click="handleChartDateCommand('table', 'today')">今日</el-button>
+              <el-button text size="small" @click="handleChartDateCommand('table', 'week')">过去7天</el-button>
+              <el-button text size="small" @click="handleChartDateCommand('table', 'month')">过去30天</el-button>
+            </div>
+            <div class="date-custom-select">
+              <span class="date-custom-label">自定义日期：</span>
+              <el-date-picker
+                v-model="tableCustomDate"
+                type="daterange"
+                range-separator="至"
+                format="YYYY-MM-DD"
+                value-format="YYYY-MM-DD"
+                @change="handleTableCustomDateChange"
+                style="width: 220px;"
+              />
+            </div>
+          </div>
+        </el-popover>
       </div>
       <el-table :data="tableData" stripe style="width: 100%" max-height="400">
         <el-table-column prop="period" label="时间段" width="150" />
@@ -475,7 +491,6 @@
         <el-table-column prop="positive" label="正向" width="80" />
         <el-table-column prop="negative" label="负向" width="80" />
         <el-table-column prop="neutral" label="中性" width="80" />
-        <el-table-column prop="neutralNeg" label="中性偏负" width="100" />
         <el-table-column prop="negativeRate" label="负面占比" width="100">
           <template #default="{ row }">{{ row.negativeRate ? (row.negativeRate * 100).toFixed(1) + '%' : '-' }}</template>
         </el-table-column>
@@ -550,6 +565,8 @@ const CHART_SETTINGS_KEY = 'realtime_chart_settings'
 
 const lastRefreshTime = ref(new Date().toLocaleString('zh-CN'))
 const isRefreshing = ref(false)
+const globalDatePopoverVisible = ref(false)
+const tableDatePopoverVisible = ref(false)
 
 const chartSettingVisible = ref(false)
 const chartSettingTitle = ref('')
@@ -678,6 +695,7 @@ const metrics = computed(() => {
 const handleGlobalDateCommand = (cmd) => {
   globalDateType.value = cmd
   globalDateRange.value = getDateRangeByType(cmd)
+  globalDatePopoverVisible.value = false
   syncAllDateRanges()
   saveSettings()
 }
@@ -686,6 +704,7 @@ const handleCustomDateChange = () => {
   if (customDateRange.value && customDateRange.value.length === 2) {
     globalDateType.value = 'custom'
     globalDateRange.value = customDateRange.value
+    globalDatePopoverVisible.value = false
     syncAllDateRanges()
     saveSettings()
   }
@@ -825,6 +844,21 @@ const handleChartCustomDate = (chart) => {
     dateTypeRef.value = 'custom'
     dateRangeRef.value = customDate
     if (updateFn) updateFn()
+    saveSettings()
+  }
+}
+
+const handleChartDateCommand = (chart, cmd) => {
+  tableDatePopoverVisible.value = false
+  handleChartDateChange(chart, cmd)
+}
+
+const handleTableCustomDateChange = () => {
+  if (tableCustomDate.value && tableCustomDate.value.length === 2) {
+    tableDateType.value = 'custom'
+    tableDateRange.value = tableCustomDate.value
+    tableDatePopoverVisible.value = false
+    updateTableData()
     saveSettings()
   }
 }
@@ -1040,6 +1074,10 @@ const groupByPeriod = (reviews, aggregation) => {
       weekStart.setDate(d.getDate() - d.getDay())
       key = weekStart.toISOString().split('T')[0]
     }
+    if (aggregation === 'month') {
+      const d = new Date(r['日期'])
+      key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    }
     if (!groups[key]) groups[key] = []
     groups[key].push(r)
   })
@@ -1097,7 +1135,7 @@ const updateSentimentPieChart = () => {
   if (!sentimentPieChart.value || !props.data?.reviews) return
   
   const reviews = getDateFilteredReviews(sentimentPieDateRange.value)
-  const sentimentCount = { '正向': 0, '负向': 0, '中性': 0, '中性偏负': 0 }
+  const sentimentCount = { '正向': 0, '负向': 0, '中性': 0 }
   reviews.forEach(r => {
     if (sentimentCount.hasOwnProperty(r['情感'])) sentimentCount[r['情感']]++
   })
@@ -1129,7 +1167,7 @@ const updateSentimentPieChart = () => {
       },
       emphasis: { label: { show: true, fontSize: 14, fontWeight: 'bold' } },
       data,
-      color: ['#67c23a', '#f56c6c', '#909399', '#e6a23c']
+      color: ['#67c23a', '#f56c6c', '#909399']
     }]
   })
 }
@@ -1141,8 +1179,8 @@ const updateSentimentTrendChart = () => {
   const groups = groupByPeriod(reviews, sentimentAggregation.value)
   
   const periods = Object.keys(groups).sort()
-  const sentimentTypes = ['正向', '负向', '中性', '中性偏负']
-  const colors = ['#67c23a', '#f56c6c', '#909399', '#e6a23c']
+  const sentimentTypes = ['正向', '负向', '中性']
+  const colors = ['#67c23a', '#f56c6c', '#909399']
   const interval = getLabelInterval(periods.length)
   
   const series = sentimentTypes.map((type, idx) => ({
@@ -1374,7 +1412,6 @@ const updateTableData = () => {
     const positive = reviews.filter(r => r['情感'] === '正向').length
     const negative = reviews.filter(r => r['情感'] === '负向').length
     const neutral = reviews.filter(r => r['情感'] === '中性').length
-    const neutralNeg = reviews.filter(r => r['情感'] === '中性偏负').length
     
     tableData.value = [{
       period: '合计',
@@ -1383,7 +1420,6 @@ const updateTableData = () => {
       positive,
       negative,
       neutral,
-      neutralNeg,
       negativeRate: total > 0 ? negative / total : 0
     }]
   } else {
@@ -1397,7 +1433,6 @@ const updateTableData = () => {
       const positive = groupReviews.filter(r => r['情感'] === '正向').length
       const negative = groupReviews.filter(r => r['情感'] === '负向').length
       const neutral = groupReviews.filter(r => r['情感'] === '中性').length
-      const neutralNeg = groupReviews.filter(r => r['情感'] === '中性偏负').length
       
       return {
         period,
@@ -1406,7 +1441,6 @@ const updateTableData = () => {
         positive,
         negative,
         neutral,
-        neutralNeg,
         negativeRate: total > 0 ? negative / total : 0
       }
     })
@@ -1416,7 +1450,7 @@ const updateTableData = () => {
 const exportCSV = () => {
   if (tableData.value.length === 0) return
   
-  const headers = ['时间段', '评价数', '平均星级', '正向', '负向', '中性', '中性偏负', '负面占比']
+  const headers = ['时间段', '评价数', '平均星级', '正向', '负向', '中性', '负面占比']
   const rows = tableData.value.map(row => [
     row.period,
     row.total,
@@ -1424,7 +1458,6 @@ const exportCSV = () => {
     row.positive,
     row.negative,
     row.neutral,
-    row.neutralNeg,
     row.negativeRate ? (row.negativeRate * 100).toFixed(1) + '%' : ''
   ])
   
@@ -1593,5 +1626,48 @@ onMounted(() => {
 
 .setting-tip .el-icon {
   color: #409eff;
+}
+
+.date-popover-content {
+  padding: 8px 0;
+}
+
+.date-quick-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.date-custom-select {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-custom-label {
+  font-size: 13px;
+  color: #606266;
+}
+
+.date-popover-content {
+  padding: 8px 0;
+}
+
+.date-quick-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.date-custom-select {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 </style>

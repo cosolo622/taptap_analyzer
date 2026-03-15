@@ -58,3 +58,24 @@ Thumbs.db
 
 # Backup
 *_backup*/
+
+# Temporary test files
+test_*.py
+debug_*.py
+simple_test.py
+test_output.txt
+test_result.txt
+run_test.bat
+
+# Crawl output files (large JSON)
+v1.1/backend/output/*.json
+v1.1/backend/output/*.txt
+output/*.json
+
+# Temporary HTML files
+*.html
+!index.html
+
+# Temporary JSON files
+big_v_list.json
+xiatian77_data.json

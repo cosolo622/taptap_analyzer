@@ -47,13 +47,32 @@ class TapTapCrawler:
     def get_game_id(self, game_name: str) -> Optional[int]:
         return self.GAME_ID_MAP.get(game_name)
     
-    async def get_reviews_async(self, game_id: int, max_reviews: int = 100) -> List[Dict]:
-        """获取游戏评价（异步版本）- 极速版"""
+    async def get_reviews_async(self, game_id: int, max_reviews: int = 100, sort: str = 'default') -> List[Dict]:
+        """
+        获取游戏评价（异步版本）- 极速版
+        
+        Args:
+            game_id: 游戏ID
+            max_reviews: 最大评价数量
+            sort: 排序方式
+                - 'default': 综合排序（默认）
+                - 'new': 最新排序
+        
+        Returns:
+            List[Dict]: 评价列表
+        
+        替代方案：
+        - 可以添加更多排序方式：'hot'(热门)、'positive'(好评)等
+        """
         if not self.browser:
             await self._init_browser()
         
+        # 构建URL，支持排序参数
         url = f"https://www.taptap.cn/app/{game_id}/review"
-        logger.info(f"开始爬取: {url}")
+        if sort == 'new':
+            url += "?sort=new"
+        
+        logger.info(f"开始爬取: {url} (排序: {sort})")
         
         await self.page.goto(url, wait_until='domcontentloaded')
         await self.page.wait_for_selector('.review-item', timeout=10000)
@@ -105,9 +124,19 @@ class TapTapCrawler:
         logger.info(f"爬取完成，共 {len(reviews)} 条评价")
         return reviews[:max_reviews]
     
-    def get_reviews(self, game_id: int, max_reviews: int = 100) -> List[Dict]:
-        """获取游戏评价（同步版本）"""
-        return asyncio.run(self.get_reviews_async(game_id, max_reviews))
+    def get_reviews(self, game_id: int, max_reviews: int = 100, sort: str = 'default') -> List[Dict]:
+        """
+        获取游戏评价（同步版本）
+        
+        Args:
+            game_id: 游戏ID
+            max_reviews: 最大评价数量
+            sort: 排序方式 ('default' 或 'new')
+        
+        Returns:
+            List[Dict]: 评价列表
+        """
+        return asyncio.run(self.get_reviews_async(game_id, max_reviews, sort))
     
     async def _parse_reviews(self) -> List[Dict]:
         """解析页面上的评价"""

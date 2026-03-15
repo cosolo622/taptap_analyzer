@@ -42,7 +42,6 @@
               <el-option label="正向" value="正向" />
               <el-option label="负向" value="负向" />
               <el-option label="中性" value="中性" />
-              <el-option label="中性偏负" value="中性偏负" />
             </el-select>
           </div>
         </el-col>
@@ -273,8 +272,7 @@ const getSentimentType = (sentiment) => {
   const typeMap = {
     '正向': 'success',
     '负向': 'danger',
-    '中性': 'info',
-    '中性偏负': 'warning'
+    '中性': 'info'
   }
   return typeMap[sentiment] || ''
 }

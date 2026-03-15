@@ -224,7 +224,7 @@ async def get_data_from_db(product_id: Optional[int], platform_id: Optional[int]
             reviews_list.append({
                 '日期': r.review_date.isoformat() if r.review_date else None,
                 '用户名': r.user_name,
-                '星级': f"{r.rating}星" if r.rating else None,
+                '星级': r.rating if r.rating else None,
                 '情感': r.sentiment,
                 '问题分类': r.problem_category,
                 '一句话摘要': r.summary,
