@@ -19,10 +19,30 @@ from services.crawler_service import CrawlerService
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/crawler", tags=["crawler"])
 
+# 全局爬虫状态
+_crawler_status = {
+    'running': False,
+    'product': None,
+    'crawled': 0,
+    'analyzed': 0,
+    'total': 0,
+    'logs': []
+}
+
+
+def get_global_crawler_status():
+    """获取全局爬虫状态"""
+    return _crawler_status
+
+
+def update_crawler_status(**kwargs):
+    """更新全局爬虫状态"""
+    _crawler_status.update(kwargs)
+
 
 @router.get("/status")
 def get_crawler_status(
-    product_name: str = Query(..., description="产品名称，如：鹅鸭杀"),
+    product_name: str = Query(default=None, description="产品名称，如：鹅鸭杀"),
     platform_name: str = Query(default="TapTap", description="平台名称"),
     db: Session = Depends(get_db)
 ):
@@ -30,12 +50,18 @@ def get_crawler_status(
     获取爬取状态
     
     返回：
-    - total_reviews: 总评价数
-    - last_review_date: 最新评价日期
-    - last_crawl_time: 最后爬取时间
-    - gap_days: 缺失天数
-    - gap_dates: 缺失日期列表
+    - running: 是否正在运行
+    - product: 当前产品
+    - crawled: 已爬取数量
+    - analyzed: 已分析数量
+    - total: 总数量
+    - logs: 日志列表
     """
+    # 如果没有传入product_name，返回全局状态
+    if not product_name:
+        return _crawler_status
+    
+    # 否则返回特定产品的状态
     service = CrawlerService(db)
     return service.get_status(product_name, platform_name)
 

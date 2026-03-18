@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-阿里百炼Coding Plan API 分析器
-支持模型: glm-5, qwen3.5-plus, kimi-k2.5 等
+阿里百炼 Coding Plan API 分析器
+支持GLM-5、千问等模型进行情感分析
 """
 import os
 import json
 import re
 from datetime import datetime
 from typing import Dict, Optional
-import requests
 
 # Token配置
 DAILY_TOKEN_LIMIT = 100000  # 每日Token限额
 PER_REQUEST_TOKEN_LIMIT = 500  # 单次请求Token限额
 
 # 阿里百炼配置
-ALIYUN_API_KEY = os.environ.get('ALIYUN_API_KEY', 'sk-sp-873fa25290a343ce9493e2d260bf887b')
+ALIYUN_API_KEY = "sk-sp-873fa25290a343ce9***********887b"  # 替换为完整API Key
 ALIYUN_BASE_URL = "https://coding.dashscope.aliyuncs.com/v1"
 DEFAULT_MODEL = "glm-5"  # 可选: qwen3.5-plus, glm-5, kimi-k2.5
 
@@ -107,7 +106,7 @@ class TokenTracker:
 
 
 class AliyunAnalyzer:
-    """阿里百炼API分析器 - 支持多种模型"""
+    """阿里百炼API分析器 - 支持GLM-5、千问等模型"""
     
     SYSTEM_PROMPT = """你是一个专业的游戏评价分析师。你的任务是分析TapTap游戏评价。
 
@@ -141,19 +140,39 @@ class AliyunAnalyzer:
 2. problem_category必须从分类体系中选择
 3. 只输出JSON，不要输出其他内容"""
     
-    def __init__(self, api_key: str = None, token_tracker: TokenTracker = None, model: str = None):
+    def __init__(self, api_key: str = None, base_url: str = None, model: str = None, token_tracker: TokenTracker = None):
         """
         初始化分析器
         
         Args:
             api_key: 阿里百炼API密钥
+            base_url: API基础URL
+            model: 使用的模型（glm-5, qwen3.5-plus等）
             token_tracker: Token追踪器
-            model: 使用的模型 (glm-5, qwen3.5-plus, kimi-k2.5等)
         """
         self.api_key = api_key or ALIYUN_API_KEY
-        self.token_tracker = token_tracker or TokenTracker()
+        self.base_url = base_url or ALIYUN_BASE_URL
         self.model = model or DEFAULT_MODEL
-        self.base_url = ALIYUN_BASE_URL
+        self.token_tracker = token_tracker or TokenTracker()
+        self.client = None
+        
+        self._init_client()
+    
+    def _init_client(self):
+        """初始化OpenAI兼容客户端"""
+        try:
+            from openai import OpenAI
+            
+            # 使用阿里百炼的Base URL，兼容OpenAI SDK
+            self.client = OpenAI(
+                api_key=self.api_key,
+                base_url=self.base_url
+            )
+            print(f"阿里百炼客户端初始化成功，模型: {self.model}")
+        except ImportError:
+            print("警告: 未安装openai库，请运行: pip install openai")
+        except Exception as e:
+            print(f"警告: 初始化客户端失败: {e}")
     
     def analyze(self, content: str, review_id: str = None) -> Dict:
         """
@@ -166,11 +185,14 @@ class AliyunAnalyzer:
         Returns:
             分析结果: {sentiment, problem_category, summary, success}
         """
+        if not self.client:
+            return self._get_default_result("客户端未初始化")
+        
         # 截断过长内容
         if len(content) > 500:
             content = content[:500]
         
-        # 预估token数（中文约1.5字符/token）
+        # 预估token数
         estimated_tokens = int(len(content) * 0.7 + 200)
         
         # 检查是否可以请求
@@ -179,41 +201,28 @@ class AliyunAnalyzer:
             return self._get_default_result(error)
         
         try:
-            # 调用阿里百炼API (OpenAI兼容格式)
-            response = requests.post(
-                f"{self.base_url}/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": self.model,
-                    "messages": [
-                        {"role": "system", "content": self.SYSTEM_PROMPT},
-                        {"role": "user", "content": f"分析评价：{content}"}
-                    ],
-                    "temperature": 0.3,
-                    "max_tokens": 100
-                },
-                timeout=30
+            # 调用阿里百炼API（OpenAI兼容格式）
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": self.SYSTEM_PROMPT},
+                    {"role": "user", "content": f"分析评价：{content}"}
+                ],
+                temperature=0.3,
+                max_tokens=100,
             )
             
-            if response.status_code != 200:
-                return self._get_default_result(f"API错误: {response.status_code}")
-            
-            data = response.json()
-            
             # 记录token使用
-            usage = data.get('usage', {})
+            usage = response.usage
             self.token_tracker.log_usage(
-                prompt_tokens=usage.get('prompt_tokens', 0),
-                completion_tokens=usage.get('completion_tokens', 0),
+                prompt_tokens=usage.prompt_tokens,
+                completion_tokens=usage.completion_tokens,
                 model=self.model,
                 review_id=review_id
             )
             
             # 解析结果
-            result_text = data['choices'][0]['message']['content']
+            result_text = response.choices[0].message.content
             return self._parse_result(result_text)
             
         except Exception as e:
@@ -311,6 +320,7 @@ def estimate_token_cost(review_count: int, avg_content_length: int = 100) -> Dic
     }
 
 
+# 测试函数
 def test_analyzer():
     """测试分析器"""
     print("="*50)
@@ -343,7 +353,7 @@ def test_analyzer():
 if __name__ == '__main__':
     # Token预估
     print("="*50)
-    print("Token消耗预估 (阿里百炼Coding Plan)")
+    print("Token消耗预估")
     print("="*50)
     
     for count in [3, 5, 10, 50, 100]:
@@ -356,8 +366,6 @@ if __name__ == '__main__':
     estimate = estimate_token_cost(1)
     print(f"预计每天可分析: {estimate['daily_limit_reviews']} 条评价")
     
-    # 运行测试
-    print("\n" + "="*50)
-    print("运行API测试...")
-    print("="*50)
+    # 测试分析器
+    print("\n")
     test_analyzer()

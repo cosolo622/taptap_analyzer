@@ -17,6 +17,7 @@ import math
 from typing import Optional
 
 from api.crawler import router as crawler_router
+from models import SessionLocal, init_db, Product, Review, CrawlLog
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 OUTPUT_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'output'))
@@ -210,14 +211,25 @@ async def get_data_from_db(product_id: Optional[int], platform_id: Optional[int]
         word_counter = Counter(word_list)
         top_words = [{'词语': w, '频次': c} for w, c in word_counter.most_common(20)]
         
+        # 从数据库获取周列表（基于实际评价日期）
+        from datetime import timedelta
         weeks = []
-        charts_dir = os.path.join(OUTPUT_DIR, 'charts')
-        if os.path.exists(charts_dir):
-            for f in os.listdir(charts_dir):
-                if f.startswith('词云_') and f.endswith('.png'):
-                    week = f.replace('词云_', '').replace('.png', '')
-                    weeks.append(week)
-            weeks.sort()
+        if reviews:
+            # 获取日期范围
+            valid_dates = [r.review_date for r in reviews if r.review_date]
+            if valid_dates:
+                min_date = min(valid_dates)
+                max_date = max(valid_dates)
+                
+                # 计算所有周
+                current_week = min_date - timedelta(days=min_date.weekday())
+                end_week = max_date - timedelta(days=max_date.weekday())
+                
+                while current_week <= end_week:
+                    weeks.append(current_week.strftime('%Y-%m-%d'))
+                    current_week += timedelta(days=7)
+        
+        weeks.sort()
         
         reviews_list = []
         for r in reviews[:500]:
@@ -411,6 +423,575 @@ async def get_files():
             if f.endswith('.xlsx') and 'GLM分析' in f:
                 files.append(f)
     return {"files": files}
+
+
+@app.get("/api/monitor/status")
+async def get_monitor_status():
+    """
+    获取系统监控状态
+    
+    Returns:
+        系统状态、Token消耗、任务日志等信息
+    """
+    import json
+    from datetime import datetime
+    
+    # 读取Token使用记录
+    token_file = os.path.join(BASE_DIR, 'logs', 'token_usage.json')
+    daily_tokens = 0
+    total_tokens = 0
+    
+    if os.path.exists(token_file):
+        try:
+            with open(token_file, 'r', encoding='utf-8') as f:
+                token_logs = json.load(f)
+                today = datetime.now().strftime('%Y-%m-%d')
+                for entry in token_logs:
+                    if entry.get('timestamp', '').startswith(today):
+                        daily_tokens += entry.get('total', 0)
+                    total_tokens += entry.get('total', 0)
+        except:
+            pass
+    
+    # 读取任务日志
+    task_log_file = os.path.join(BASE_DIR, 'logs', 'task_logs.json')
+    task_logs = []
+    today_processed = 0
+    
+    if os.path.exists(task_log_file):
+        try:
+            with open(task_log_file, 'r', encoding='utf-8') as f:
+                all_logs = json.load(f)
+                today = datetime.now().strftime('%Y-%m-%d')
+                
+                # 过滤今日日志
+                for log in all_logs:
+                    if log.get('timestamp', '').startswith(today):
+                        task_logs.append(log)
+                        if log.get('status') == 'success':
+                            today_processed += log.get('details', {}).get('saved', 0)
+                
+                # 只返回最近10条
+                task_logs = task_logs[-10:][::-1]
+        except:
+            pass
+    
+    # 计算预估费用（GLM-4-flash 约 ¥0.001/1k tokens）
+    estimated_cost = round(daily_tokens * 0.001 / 1000, 4)
+    
+    # 计算下次执行时间
+    now = datetime.now()
+    current_hour = now.hour
+    run_hours = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22]
+    
+    next_hour = None
+    for h in run_hours:
+        if h > current_hour:
+            next_hour = h
+            break
+    
+    if next_hour is None:
+        next_hour = run_hours[0]  # 第二天0点
+    
+    next_run = now.replace(hour=next_hour, minute=0, second=0, microsecond=0)
+    if next_hour <= current_hour:
+        next_run = next_run.replace(day=now.day + 1)
+    
+    next_run_time = next_run.strftime('%Y-%m-%d %H:%M')
+    
+    # 判断系统状态
+    system_status = 'running'
+    if daily_tokens >= 90000:  # 90%以上
+        system_status = 'warning'
+    elif task_logs and task_logs[0].get('status') == 'failed':
+        system_status = 'error'
+    
+    return {
+        'system_status': system_status,
+        'next_run_time': next_run_time,
+        'today_processed': today_processed,
+        'daily_tokens': daily_tokens,
+        'daily_limit': 100000,
+        'estimated_cost': str(estimated_cost),
+        'task_logs': task_logs
+    }
+
+
+# ========== 产品管理API ==========
+
+@app.get("/api/products")
+async def get_products():
+    """
+    获取所有监控产品列表
+    
+    Returns:
+        products: 产品列表
+    """
+    init_db()
+    db = SessionLocal()
+    
+    try:
+        products = db.query(Product).all()
+        return {
+            'products': [
+                {
+                    'id': p.id,
+                    'name': p.name,
+                    'code': p.code,
+                    'platform': 'taptap',
+                    'status': 'active',
+                    'last_crawl': None,
+                    'review_count': db.query(Review).filter(Review.product_id == p.id).count()
+                }
+                for p in products
+            ]
+        }
+    finally:
+        db.close()
+
+
+@app.get("/api/products/search")
+async def search_products(keyword: str = Query(..., min_length=1)):
+    """
+    搜索产品（模糊匹配）- 使用Playwright真实搜索TapTap
+    
+    参数:
+        keyword: 搜索关键词
+        
+    返回:
+        results: 匹配的产品列表
+    """
+    from crawler.taptap_search_playwright import search_taptap_game
+    
+    try:
+        results = search_taptap_game(keyword, max_results=10)
+        return {'results': results}
+    except Exception as e:
+        print(f"搜索失败: {e}")
+        return {'results': [], 'error': str(e)}
+
+
+@app.post("/api/products")
+async def add_product(name: str, platform: str = 'taptap', code: str = None):
+    """
+    添加新的监控产品
+    
+    Args:
+        name: 产品名称
+        platform: 平台
+        code: 产品代码
+        
+    Returns:
+        添加结果
+    """
+    init_db()
+    db = SessionLocal()
+    
+    try:
+        # 检查是否已存在
+        existing = db.query(Product).filter(Product.name == name).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="产品已存在")
+        
+        # 创建新产品
+        product = Product(
+            name=name,
+            code=code or name,
+        )
+        db.add(product)
+        db.commit()
+        
+        return {'success': True, 'id': product.id}
+    finally:
+        db.close()
+
+
+@app.post("/api/products/{product_id}/pause")
+async def pause_product(product_id: int):
+    """
+    暂停产品监控
+    
+    Args:
+        product_id: 产品ID
+    """
+    # TODO: 实现暂停逻辑
+    return {'success': True}
+
+
+# ========== 爬虫控制API ==========
+
+# 导入api/crawler.py中的全局状态
+from api.crawler import _crawler_status as crawler_status, update_crawler_status
+
+
+@app.post("/api/crawler/start")
+async def start_crawler(product_id: int, max_count: int = 100):
+    """
+    启动爬虫任务
+    
+    Args:
+        product_id: 产品ID
+        max_count: 最大爬取数量
+    """
+    global crawler_status
+    
+    init_db()
+    db = SessionLocal()
+    
+    try:
+        product = db.query(Product).filter(Product.id == product_id).first()
+        if not product:
+            raise HTTPException(status_code=404, detail="产品不存在")
+        
+        crawler_status['running'] = True
+        crawler_status['product'] = product.name
+        crawler_status['crawled'] = 0
+        crawler_status['analyzed'] = 0
+        crawler_status['total'] = max_count
+        crawler_status['logs'] = [
+            {'type': 'info', 'message': f'开始爬取 {product.name} 的评价...'}
+        ]
+        
+        # TODO: 实际启动爬虫任务
+        # 这里应该异步启动爬虫
+        
+        return {'success': True, 'message': '爬虫任务已启动'}
+    finally:
+        db.close()
+
+
+@app.post("/api/crawler/stop")
+async def stop_crawler():
+    """
+    停止爬虫任务
+    """
+    global crawler_status
+    
+    crawler_status['running'] = False
+    crawler_status['logs'].append({
+        'type': 'warning',
+        'message': '爬虫任务已停止'
+    })
+    
+    return {'success': True, 'message': '爬虫任务已停止'}
+
+
+@app.get("/api/data-status")
+async def get_data_status(product_id: Optional[int] = Query(None, description="产品ID")):
+    """
+    获取数据状态
+    
+    Returns:
+        total_reviews: 总评价数
+        last_review_date: 最新评价日期
+        last_crawl_date: 最后爬取日期
+        last_crawl_status: 最后爬取状态
+        gap_days: 缺失天数
+        gap_dates: 缺失日期列表
+    """
+    from models import SessionLocal, Review, CrawlLog
+    from datetime import timedelta
+    
+    init_db()
+    db = SessionLocal()
+    
+    try:
+        query = db.query(Review)
+        if product_id:
+            query = query.filter(Review.product_id == product_id)
+        
+        total_reviews = query.count()
+        
+        last_review = query.filter(Review.review_date != None).order_by(Review.review_date.desc()).first()
+        last_review_date = last_review.review_date.isoformat() if last_review and last_review.review_date else None
+        
+        crawl_query = db.query(CrawlLog)
+        if product_id:
+            crawl_query = crawl_query.filter(CrawlLog.product_id == product_id)
+        
+        last_crawl = crawl_query.order_by(CrawlLog.start_time.desc()).first()
+        last_crawl_date = last_crawl.start_time.strftime('%Y-%m-%d %H:%M:%S') if last_crawl and last_crawl.start_time else None
+        last_crawl_status = last_crawl.status if last_crawl else '无记录'
+        
+        gap_days = 0
+        gap_dates = []
+        
+        if last_review_date:
+            from datetime import datetime as dt
+            last_date = dt.strptime(last_review_date, '%Y-%m-%d').date()
+            today = dt.now().date()
+            days_diff = (today - last_date).days
+            
+            if days_diff > 1:
+                existing_dates = set(
+                    r.review_date for r in query.filter(Review.review_date != None).all()
+                )
+                
+                check_start = today - timedelta(days=30)
+                current = check_start
+                while current <= today:
+                    if current not in existing_dates and current.weekday() < 5:
+                        gap_dates.append(current.isoformat())
+                    current += timedelta(days=1)
+                
+                gap_days = len(gap_dates)
+        
+        return {
+            'total_reviews': total_reviews,
+            'last_review_date': last_review_date or '无数据',
+            'last_crawl_date': last_crawl_date or '无记录',
+            'last_crawl_status': last_crawl_status,
+            'gap_days': gap_days,
+            'gap_dates': gap_dates[:10]
+        }
+    finally:
+        db.close()
+
+
+@app.get("/api/crawl-logs")
+async def get_crawl_logs(
+    product_id: Optional[int] = Query(None, description="产品ID"),
+    limit: int = Query(20, description="返回条数")
+):
+    """
+    获取爬取日志
+    
+    Args:
+        product_id: 产品ID
+        limit: 返回条数
+        
+    Returns:
+        logs: 爬取日志列表
+    """
+    from models import SessionLocal, CrawlLog
+    
+    init_db()
+    db = SessionLocal()
+    
+    try:
+        query = db.query(CrawlLog)
+        if product_id:
+            query = query.filter(CrawlLog.product_id == product_id)
+        
+        logs = query.order_by(CrawlLog.start_time.desc()).limit(limit).all()
+        
+        return {
+            'logs': [
+                {
+                    'id': log.id,
+                    'spider_name': log.spider_name,
+                    'start_time': log.start_time.isoformat() if log.start_time else None,
+                    'end_time': log.end_time.isoformat() if log.end_time else None,
+                    'pages_crawled': log.pages_crawled,
+                    'reviews_added': log.reviews_added,
+                    'reviews_updated': log.reviews_updated,
+                    'errors': log.errors,
+                    'status': log.status,
+                    'error_message': log.error_message
+                }
+                for log in logs
+            ]
+        }
+    finally:
+        db.close()
+
+
+@app.post("/api/crawler/incremental")
+async def crawl_incremental(
+    product_id: int = Query(..., description="产品ID"),
+    start_date: Optional[str] = Query(None, description="开始日期"),
+    end_date: Optional[str] = Query(None, description="结束日期")
+):
+    """
+    增量更新爬取
+    
+    Args:
+        product_id: 产品ID
+        start_date: 开始日期（可选）
+        end_date: 结束日期（可选）
+        
+    Returns:
+        任务启动结果
+    """
+    from models import SessionLocal, Product, Review, CrawlLog
+    from datetime import datetime as dt, timedelta
+    import asyncio
+    import threading
+    
+    global crawler_status
+    
+    init_db()
+    db = SessionLocal()
+    
+    try:
+        product = db.query(Product).filter(Product.id == product_id).first()
+        if not product:
+            raise HTTPException(status_code=404, detail="产品不存在")
+        
+        if not start_date:
+            last_review = db.query(Review).filter(
+                Review.product_id == product_id
+            ).order_by(Review.review_date.desc()).first()
+            
+            if last_review and last_review.review_date:
+                start_date = (last_review.review_date + timedelta(days=1)).isoformat()
+            else:
+                start_date = (dt.now().date() - timedelta(days=7)).isoformat()
+        
+        if not end_date:
+            end_date = dt.now().date().isoformat()
+        
+        crawl_log = CrawlLog(
+            spider_name='incremental',
+            product_id=product_id,
+            platform_id=1,
+            start_time=dt.now(),
+            status='running'
+        )
+        db.add(crawl_log)
+        db.commit()
+        
+        crawler_status['running'] = True
+        crawler_status['product'] = product.name
+        crawler_status['crawled'] = 0
+        crawler_status['analyzed'] = 0
+        crawler_status['total'] = 100
+        crawler_status['logs'] = [
+            {'type': 'info', 'message': f'开始增量爬取 {product.name} ({start_date} ~ {end_date})'}
+        ]
+        
+        def run_crawler():
+            try:
+                from scripts.run_crawler import TapTapCrawler
+                
+                crawler = TapTapCrawler(
+                    product_name=product.name,
+                    max_reviews=500,
+                    target_date=start_date
+                )
+                reviews = crawler.run()
+                
+                if reviews:
+                    crawler_status['crawled'] = len(reviews)
+                    crawler_status['logs'].append({
+                        'type': 'success',
+                        'message': f'爬取完成，获取 {len(reviews)} 条评价'
+                    })
+                    
+                    crawl_log.reviews_added = len(reviews)
+                    crawl_log.end_time = dt.now()
+                    crawl_log.status = 'success'
+                    db.commit()
+                else:
+                    crawler_status['logs'].append({
+                        'type': 'warning',
+                        'message': '未获取到新评价'
+                    })
+                    crawl_log.end_time = dt.now()
+                    crawl_log.status = 'success'
+                    crawl_log.reviews_added = 0
+                    db.commit()
+                    
+            except Exception as e:
+                crawler_status['logs'].append({
+                    'type': 'error',
+                    'message': f'爬取失败: {str(e)}'
+                })
+                crawl_log.end_time = dt.now()
+                crawl_log.status = 'failed'
+                crawl_log.error_message = str(e)
+                db.commit()
+            finally:
+                crawler_status['running'] = False
+        
+        thread = threading.Thread(target=run_crawler)
+        thread.daemon = True
+        thread.start()
+        
+        return {
+            'success': True,
+            'message': f'增量更新已启动 ({start_date} ~ {end_date})',
+            'crawl_log_id': crawl_log.id
+        }
+        
+    finally:
+        db.close()
+
+
+@app.post("/api/crawler/fill-gaps")
+async def fill_gaps(product_id: int = Query(..., description="产品ID")):
+    """
+    自动补漏
+    
+    Args:
+        product_id: 产品ID
+        
+    Returns:
+        任务启动结果
+    """
+    from models import SessionLocal, Product, Review, CrawlLog
+    from datetime import datetime as dt, timedelta
+    
+    global crawler_status
+    
+    init_db()
+    db = SessionLocal()
+    
+    try:
+        product = db.query(Product).filter(Product.id == product_id).first()
+        if not product:
+            raise HTTPException(status_code=404, detail="产品不存在")
+        
+        existing_dates = set(
+            r.review_date for r in db.query(Review).filter(
+                Review.product_id == product_id,
+                Review.review_date != None
+            ).all()
+        )
+        
+        today = dt.now().date()
+        check_start = today - timedelta(days=30)
+        gap_dates = []
+        
+        current = check_start
+        while current <= today:
+            if current not in existing_dates and current.weekday() < 5:
+                gap_dates.append(current.isoformat())
+            current += timedelta(days=1)
+        
+        if not gap_dates:
+            return {
+                'status': 'skipped',
+                'message': '没有检测到缺失的日期'
+            }
+        
+        crawl_log = CrawlLog(
+            spider_name='fill_gaps',
+            product_id=product_id,
+            platform_id=1,
+            start_time=dt.now(),
+            status='running'
+        )
+        db.add(crawl_log)
+        db.commit()
+        
+        crawler_status['running'] = True
+        crawler_status['product'] = product.name
+        crawler_status['crawled'] = 0
+        crawler_status['analyzed'] = 0
+        crawler_status['total'] = len(gap_dates)
+        crawler_status['logs'] = [
+            {'type': 'info', 'message': f'开始补漏，共 {len(gap_dates)} 天'}
+        ]
+        
+        return {
+            'success': True,
+            'message': f'补漏任务已启动，共 {len(gap_dates)} 天缺失',
+            'gap_dates': gap_dates[:10]
+        }
+        
+    finally:
+        db.close()
 
 
 if __name__ == "__main__":

@@ -59,6 +59,14 @@
                 <el-icon><Refresh /></el-icon>
                 <span>数据更新</span>
               </el-menu-item>
+              <el-menu-item index="monitor">
+                <el-icon><Monitor /></el-icon>
+                <span>系统监控</span>
+              </el-menu-item>
+              <el-menu-item index="products">
+                <el-icon><Setting /></el-icon>
+                <span>产品管理</span>
+              </el-menu-item>
             </el-sub-menu>
             
             <el-sub-menu index="xiaohongshu" disabled>
@@ -81,6 +89,8 @@
           <AnalysisReport v-else-if="activeMenu === 'report'" :data="data" />
           <AlertSettings v-else-if="activeMenu === 'alert'" :data="data" @alert-change="handleAlertChange" />
           <DataUpdate v-else-if="activeMenu === 'dataupdate'" @refresh="loadData" />
+          <SystemMonitor v-else-if="activeMenu === 'monitor'" />
+          <ProductManage v-else-if="activeMenu === 'products'" @product-change="handleProductChange" />
         </el-main>
       </el-container>
     </el-container>
@@ -91,7 +101,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { 
   DataAnalysis, Monitor, Odometer, TrendCharts, Warning, 
-  Cloudy, Document, Bell, PictureFilled, Notebook, Refresh
+  Cloudy, Document, Bell, PictureFilled, Notebook, Refresh, Setting
 } from '@element-plus/icons-vue'
 import RealtimeData from './views/RealtimeData.vue'
 import NegativeMonitor from './views/NegativeMonitor.vue'
@@ -100,10 +110,12 @@ import Reviews from './views/Reviews.vue'
 import AnalysisReport from './views/AnalysisReport.vue'
 import AlertSettings from './views/AlertSettings.vue'
 import DataUpdate from './views/DataUpdate.vue'
+import SystemMonitor from './views/SystemMonitor.vue'
+import ProductManage from './views/ProductManage.vue'
 
 const activeMenu = ref('realtime')
-const selectedProduct = ref(1)
-const products = ref([{ id: 1, name: '鹅鸭杀', code: 'goose_goose_duck' }])
+const selectedProduct = ref(null)
+const products = ref([])
 const updateTime = ref('')
 const data = ref(null)
 const alertRules = ref([])
@@ -122,6 +134,10 @@ const handleAlertChange = (rules) => {
   alertRules.value = rules
 }
 
+const handleProductChange = () => {
+  loadProducts()
+}
+
 const loadProducts = async () => {
   try {
     const response = await fetch('/api/products')
@@ -134,6 +150,8 @@ const loadProducts = async () => {
     }
   } catch (error) {
     console.error('加载产品列表失败:', error)
+    products.value = [{ id: 1, name: '鹅鸭杀', code: 'goose_goose_duck' }]
+    selectedProduct.value = 1
   }
 }
 
