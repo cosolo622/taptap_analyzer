@@ -93,9 +93,32 @@
               自动补漏
             </el-button>
           </el-space>
+          <el-space wrap style="margin-left: 12px;">
+            <el-select v-model="autoUpdateInterval" style="width: 120px;">
+              <el-option :value="1" label="1分钟" />
+              <el-option :value="5" label="5分钟" />
+              <el-option :value="10" label="10分钟" />
+              <el-option :value="30" label="30分钟" />
+              <el-option :value="60" label="1小时" />
+              <el-option :value="120" label="2小时" />
+              <el-option :value="360" label="6小时" />
+              <el-option :value="720" label="12小时" />
+              <el-option :value="1440" label="24小时" />
+            </el-select>
+            <el-button type="info" @click="startAutoUpdate" :loading="crawling">
+              启动自动更新
+            </el-button>
+            <el-button type="danger" @click="stopAutoUpdate" :loading="crawling">
+              停止自动更新
+            </el-button>
+          </el-space>
           <div v-if="!isAdmin" class="admin-tip">
             <el-icon><WarningFilled /></el-icon>
             全量爬取需要管理员权限
+          </div>
+          <div class="form-tip" style="margin-top: 8px;">
+            自动更新状态：{{ autoUpdateStatus.running ? '运行中' : '已停止' }}，
+            间隔 {{ autoUpdateStatus.interval_minutes || 120 }} 分钟
           </div>
         </el-form-item>
       </el-form>
@@ -151,7 +174,29 @@
         </div>
       </div>
       
-      <el-empty v-if="!taskStatus.running && !taskStatus.product" description="暂无运行中的任务" />
+      <!-- 任务结果显示 -->
+      <div v-if="!taskStatus.running && taskStatus.logs && taskStatus.logs.length > 0" class="task-result">
+        <el-divider />
+        <h4>上次任务结果</h4>
+        <el-descriptions :column="3" border>
+          <el-descriptions-item label="任务类型">
+            {{ taskStatus.product || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="完成时间">
+            {{ formatTime(taskStatus.logs[taskStatus.logs.length - 1]?.time) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag :type="taskStatus.logs[taskStatus.logs.length - 1]?.type === 'success' ? 'success' : 'danger'">
+              {{ taskStatus.logs[taskStatus.logs.length - 1]?.type === 'success' ? '成功' : '失败' }}
+            </el-tag>
+          </el-descriptions-item>
+        </el-descriptions>
+        <div class="result-message" v-if="taskStatus.logs[taskStatus.logs.length - 1]?.message">
+          {{ taskStatus.logs[taskStatus.logs.length - 1]?.message }}
+        </div>
+      </div>
+      
+      <el-empty v-if="!taskStatus.running && !taskStatus.product && (!taskStatus.logs || taskStatus.logs.length === 0)" description="暂无运行中的任务" />
     </el-card>
 
     <el-card class="log-card">
@@ -174,7 +219,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="reviews_added" label="新增" width="80" />
-        <el-table-column prop="reviews_updated" label="更新" width="80" />
+        <el-table-column prop="reviews_updated" label="重复" width="80" />
         <el-table-column prop="error_message" label="错误信息" show-overflow-tooltip />
       </el-table>
     </el-card>
@@ -185,9 +230,8 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { WarningFilled, VideoPause } from '@element-plus/icons-vue'
-import axios from 'axios'
+import api from '../api'
 
-const API_BASE = '/api'
 
 const loading = ref(false)
 const crawling = ref(false)
@@ -217,6 +261,11 @@ const taskStatus = ref({
   total: 0,
   logs: []
 })
+const autoUpdateStatus = ref({
+  running: false,
+  interval_minutes: 120
+})
+const autoUpdateInterval = ref(120)
 
 const isAdmin = ref(true)
 
@@ -256,7 +305,7 @@ const formatTime = (timestamp) => {
 const refreshStatus = async () => {
   loading.value = true
   try {
-    const res = await axios.get(`${API_BASE}/data-status`, {
+    const res = await api.get('/data-status', {
       params: { product_id: form.value.product_id }
     })
     status.value = res.data
@@ -270,7 +319,7 @@ const refreshStatus = async () => {
 
 const getProducts = async () => {
   try {
-    const res = await axios.get(`${API_BASE}/products`)
+    const res = await api.get('/products')
     products.value = res.data.products || []
     if (products.value.length > 0 && !form.value.product_id) {
       form.value.product_id = products.value[0].id
@@ -282,7 +331,7 @@ const getProducts = async () => {
 
 const getLogs = async () => {
   try {
-    const res = await axios.get(`${API_BASE}/crawl-logs`, {
+    const res = await api.get('/crawl-logs', {
       params: { 
         product_id: form.value.product_id,
         limit: 20 
@@ -296,7 +345,7 @@ const getLogs = async () => {
 
 const pollTaskStatus = async () => {
   try {
-    const res = await axios.get(`${API_BASE}/crawler/status`)
+    const res = await api.get('/crawler/status')
     taskStatus.value = res.data
   } catch (error) {
     console.error('获取任务状态失败：', error)
@@ -330,7 +379,7 @@ const crawlFull = async () => {
   
   crawling.value = true
   try {
-    const res = await axios.post(`${API_BASE}/crawler/start`, null, {
+    const res = await api.post('/crawler/start', null, {
       params: {
         product_id: form.value.product_id
       }
@@ -355,7 +404,7 @@ const crawlIncremental = async () => {
       params.end_date = form.value.dateRange[1]
     }
     
-    const res = await axios.post(`${API_BASE}/crawler/incremental`, null, { params })
+    const res = await api.post('/crawler/incremental', null, { params })
     ElMessage.success(res.data.message || '增量更新已启动')
     startPolling()
   } catch (error) {
@@ -370,7 +419,7 @@ const fillGaps = async () => {
   
   crawling.value = true
   try {
-    const res = await axios.post(`${API_BASE}/crawler/fill-gaps`, null, {
+    const res = await api.post('/crawler/fill-gaps', null, {
       params: { product_id: form.value.product_id }
     })
     if (res.data.status === 'skipped') {
@@ -394,7 +443,7 @@ const stopTask = async () => {
       type: 'warning'
     })
     
-    await axios.post(`${API_BASE}/crawler/stop`)
+    await api.post('/crawler/stop')
     ElMessage.success('任务已终止')
     stopPolling()
     refreshStatus()
@@ -406,12 +455,73 @@ const stopTask = async () => {
   }
 }
 
+const fetchAutoUpdateStatus = async () => {
+  try {
+    const res = await api.get('/auto-update/status')
+    autoUpdateStatus.value = res.data.status || { running: false, interval_minutes: 120 }
+  } catch (error) {
+    console.error('获取自动更新状态失败：', error)
+  }
+}
+
+const startAutoUpdate = async () => {
+  if (!await confirmAction('auto', '启动自动更新')) return
+  crawling.value = true
+  try {
+    const res = await api.post('/auto-update/start', null, {
+      params: {
+        product_id: form.value.product_id,
+        interval_minutes: autoUpdateInterval.value
+      }
+    })
+    ElMessage.success(res.data.message || '自动更新已启动')
+    await fetchAutoUpdateStatus()
+  } catch (error) {
+    ElMessage.error('启动自动更新失败：' + (error.response?.data?.detail || error.message))
+  } finally {
+    crawling.value = false
+  }
+}
+
+const stopAutoUpdate = async () => {
+  if (!await confirmAction('auto', '停止自动更新')) return
+  crawling.value = true
+  try {
+    const res = await api.post('/auto-update/stop')
+    ElMessage.success(res.data.message || '自动更新已停止')
+    await fetchAutoUpdateStatus()
+  } catch (error) {
+    ElMessage.error('停止自动更新失败：' + (error.response?.data?.detail || error.message))
+  } finally {
+    crawling.value = false
+  }
+}
+
 let pollTimer = null
+let lastTaskRunning = false
 
 const startPolling = () => {
   if (pollTimer) clearInterval(pollTimer)
   pollTaskStatus()
-  pollTimer = setInterval(pollTaskStatus, 2000)
+  lastTaskRunning = !!taskStatus.value.running
+  pollTimer = setInterval(async () => {
+    await pollTaskStatus()
+    await getLogs()
+    
+    // 检测任务从运行中变为完成
+    if (lastTaskRunning && !taskStatus.value.running) {
+      // 任务完成，刷新日志和状态
+      await getLogs()
+      await refreshStatus()
+      
+      // 显示任务完成通知
+      const lastLog = taskStatus.value.logs?.[taskStatus.value.logs.length - 1]
+      if (lastLog && lastLog.type === 'success') {
+        ElMessage.success(`任务完成：${lastLog.message}`)
+      }
+    }
+    lastTaskRunning = taskStatus.value.running
+  }, 2000)
 }
 
 const stopPolling = () => {
@@ -425,7 +535,11 @@ onMounted(async () => {
   await getProducts()
   await refreshStatus()
   await getLogs()
-  pollTaskStatus()
+  await fetchAutoUpdateStatus()
+  await pollTaskStatus()
+  if (taskStatus.value.running) {
+    startPolling()
+  }
 })
 
 onUnmounted(() => {
@@ -547,4 +661,26 @@ onUnmounted(() => {
 .log-error { color: #f56c6c; }
 .log-warning { color: #e6a23c; }
 .log-info { color: #409eff; }
+
+.task-result {
+  margin-top: 15px;
+  padding: 15px;
+  background: #f0f9ff;
+  border-radius: 4px;
+  border: 1px solid #d9ecff;
+}
+
+.task-result h4 {
+  margin: 0 0 15px 0;
+  color: #409eff;
+}
+
+.result-message {
+  margin-top: 10px;
+  padding: 10px;
+  background: #fff;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #606266;
+}
 </style>

@@ -94,16 +94,21 @@
         
         <div v-else-if="productForm.name && !searching && searchResults.length === 0" class="search-empty">
           <el-empty description="未找到匹配的产品" :image-size="60" />
+          <el-alert type="warning" :closable="false" style="margin-top: 10px;">
+            <template #title>
+              <span>可手动输入 TapTap 应用ID 后添加</span>
+            </template>
+          </el-alert>
         </div>
         
-        <el-form-item label="产品代码" v-if="selectedProduct">
-          <el-input v-model="productForm.code" placeholder="产品唯一标识（自动生成）" disabled />
+        <el-form-item label="产品代码">
+          <el-input v-model="productForm.code" placeholder="TapTap 应用ID（可手动输入）" :disabled="!!selectedProduct" />
         </el-form-item>
       </el-form>
       
       <template #footer>
         <el-button @click="addDialogVisible = false">取消</el-button>
-        <el-button type="primary" @click="addProduct" :disabled="!selectedProduct">
+        <el-button type="primary" @click="addProduct" :disabled="!productForm.name || !productForm.code">
           确认添加
         </el-button>
       </template>
@@ -185,6 +190,8 @@ const searchProduct = async () => {
     if (searchResults.value.length === 1) {
       selectedProduct.value = searchResults.value[0]
       productForm.value.code = selectedProduct.value.id
+    } else {
+      selectedProduct.value = null
     }
   } catch (error) {
     console.error('搜索产品失败:', error)
@@ -202,17 +209,17 @@ const showAddDialog = () => {
 }
 
 const addProduct = async () => {
-  if (!selectedProduct.value) {
-    ElMessage.warning('请选择一个产品')
+  if (!productForm.value.name || !productForm.value.code) {
+    ElMessage.warning('请填写产品名称和产品代码')
     return
   }
   
   try {
-    const response = await axios.post('/api/products', null, {
+    await axios.post('/api/products', null, {
       params: {
-        name: selectedProduct.value.name,
+        name: selectedProduct.value ? selectedProduct.value.name : productForm.value.name,
         platform: 'taptap',
-        code: selectedProduct.value.id
+        code: selectedProduct.value ? selectedProduct.value.id : productForm.value.code
       }
     })
     

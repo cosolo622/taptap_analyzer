@@ -108,8 +108,11 @@ GLM_API_URL = 'https://open.bigmodel.cn/api/paas/v4/chat/completions'
 
 ### 数据库
 ```python
-# SQLite
-DATABASE_URL = "sqlite:///./taptap.db"
+# PostgreSQL（当前使用）
+DATABASE_URL = "postgresql://postgres:12357951@localhost:5432/public_opinion"
+
+# SQLite（已弃用，不再支持）
+# DATABASE_URL = "sqlite:///./taptap.db"  # 已弃用
 ```
 
 ---

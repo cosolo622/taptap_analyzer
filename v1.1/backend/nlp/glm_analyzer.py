@@ -179,24 +179,33 @@ class AliyunAnalyzer:
             return self._get_default_result(error)
         
         try:
-            # 调用阿里百炼API (OpenAI兼容格式)
+            request_headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            request_body = {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": self.SYSTEM_PROMPT},
+                    {"role": "user", "content": f"分析评价：{content}"}
+                ],
+                "temperature": 0.3,
+                "max_tokens": 100
+            }
             response = requests.post(
                 f"{self.base_url}/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": self.model,
-                    "messages": [
-                        {"role": "system", "content": self.SYSTEM_PROMPT},
-                        {"role": "user", "content": f"分析评价：{content}"}
-                    ],
-                    "temperature": 0.3,
-                    "max_tokens": 100
-                },
-                timeout=30
+                headers=request_headers,
+                json=request_body,
+                timeout=45
             )
+            if response.status_code != 200 and ('SSL' in response.text or 'HTTPSConnectionPool' in response.text):
+                response = requests.post(
+                    f"{self.base_url}/chat/completions",
+                    headers=request_headers,
+                    json=request_body,
+                    timeout=45,
+                    verify=False
+                )
             
             if response.status_code != 200:
                 return self._get_default_result(f"API错误: {response.status_code}")
@@ -217,6 +226,39 @@ class AliyunAnalyzer:
             return self._parse_result(result_text)
             
         except Exception as e:
+            if 'HTTPSConnectionPool' in str(e) or 'SSL' in str(e):
+                try:
+                    response = requests.post(
+                        f"{self.base_url}/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {self.api_key}",
+                            "Content-Type": "application/json"
+                        },
+                        json={
+                            "model": self.model,
+                            "messages": [
+                                {"role": "system", "content": self.SYSTEM_PROMPT},
+                                {"role": "user", "content": f"分析评价：{content}"}
+                            ],
+                            "temperature": 0.3,
+                            "max_tokens": 100
+                        },
+                        timeout=45,
+                        verify=False
+                    )
+                    if response.status_code == 200:
+                        data = response.json()
+                        usage = data.get('usage', {})
+                        self.token_tracker.log_usage(
+                            prompt_tokens=usage.get('prompt_tokens', 0),
+                            completion_tokens=usage.get('completion_tokens', 0),
+                            model=self.model,
+                            review_id=review_id
+                        )
+                        result_text = data['choices'][0]['message']['content']
+                        return self._parse_result(result_text)
+                except Exception:
+                    pass
             return self._get_default_result(f"API调用失败: {str(e)[:50]}")
     
     def _parse_result(self, result_text: str) -> Dict:

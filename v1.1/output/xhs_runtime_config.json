@@ -1,0 +1,12 @@
+{
+  "monitor_enabled": false,
+  "history_enabled": false,
+  "interval_minutes": 240,
+  "last_run": null,
+  "last_mode": null,
+  "last_ingest": null,
+  "last_result": null,
+  "filter_mode": "分层采集",
+  "daily_estimate_posts": 1200,
+  "daily_estimate_captured": 280
+}

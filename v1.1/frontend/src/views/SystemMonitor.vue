@@ -210,7 +210,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { SuccessFilled, WarningFilled, CircleCloseFilled, Clock, Document, Coin, Refresh, VideoPause } from '@element-plus/icons-vue'
-import axios from 'axios'
+import api from '../api'
 import { ElMessage, ElNotification, ElMessageBox } from 'element-plus'
 
 const systemStatus = ref('running')
@@ -285,7 +285,7 @@ const formatTime = (timestamp) => {
 
 const refreshMonitorStatus = async () => {
   try {
-    const response = await axios.get('/api/monitor/status')
+    const response = await api.get('/monitor/status')
     const data = response.data
     
     systemStatus.value = data.system_status || 'running'
@@ -304,7 +304,7 @@ const refreshMonitorStatus = async () => {
 
 const refreshCrawlerStatus = async () => {
   try {
-    const response = await axios.get('/api/crawler/status')
+    const response = await api.get('/crawler/status')
     crawlerStatus.value = response.data
   } catch (error) {
     console.error('获取爬虫状态失败:', error)
@@ -325,7 +325,7 @@ const stopCrawler = async () => {
       type: 'warning'
     })
     
-    await axios.post('/api/crawler/stop')
+    await api.post('/crawler/stop')
     ElMessage.success('任务已终止')
     refreshCrawlerStatus()
   } catch (error) {

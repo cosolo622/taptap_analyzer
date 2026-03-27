@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 数据导入脚本
-将 Excel 数据导入到 SQLite/PostgreSQL 数据库
+将 Excel 数据导入到 PostgreSQL 数据库（SQLite 已弃用）
 """
 
 import os

@@ -164,3 +164,28 @@ postgresql://postgres:12357951@localhost:5432/public_opinion
 ---
 
 *老版本进度文件: [PROJECT_PROGRESS_OLD.md](PROJECT_PROGRESS_OLD.md)*
+
+---
+
+## 📅 今日工作 (2026-03-18)
+
+### 已完成
+- ✅ 修复后端重复路由冲突（`/api/products`）
+- ✅ 修复调度模块错误导入（`TokenTracker`）
+- ✅ 统一数据库技术口径为 PostgreSQL
+
+### 遇到并处理的问题
+- 问题：`scheduler.py` 导入不存在的 `nlp.token_tracker`
+- 处理：改为从 `nlp/glm_analyzer.py` 统一导入 `AliyunAnalyzer, TokenTracker`
+
+### 下一步
+- ⏳ Playwright 端到端 QA 验收并保留截图证据
+- ⏳ 清理敏感配置明文（密钥与默认凭据）
+
+### 本轮验收补充
+- ✅ 已完成 Playwright 关键页面走查（首页、数据更新、系统监控、产品管理、评价明细）
+- ✅ 后端接口抽查通过：`GET /api/products` 返回 200
+- ✅ 新优化版已切到独立端口：前端 `5622`，后端 `8001`
+- ✅ 已实现自动更新控制接口：`/api/auto-update/start|stop|status`
+- ✅ 已打通手动更新：`/api/crawler/start|incremental` 可实际执行
+- ✅ 已验证新产品抓取链路：`猫咪和汤(code=374994)` 新增 5 条评价

@@ -9,7 +9,7 @@ import time
 import logging
 import asyncio
 from datetime import datetime, timedelta
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Callable
 from playwright.async_api import async_playwright, Page, ElementHandle
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -47,7 +47,15 @@ class TapTapCrawler:
     def get_game_id(self, game_name: str) -> Optional[int]:
         return self.GAME_ID_MAP.get(game_name)
     
-    async def get_reviews_async(self, game_id: int, max_reviews: int = 100, sort: str = 'default') -> List[Dict]:
+    async def get_reviews_async(
+        self,
+        game_id: int,
+        max_reviews: Optional[int] = None,
+        sort: str = 'default',
+        since_date: str = None,
+        stop_checker: Optional[Callable[[], bool]] = None,
+        progress_callback: Optional[Callable[[int], None]] = None
+    ) -> List[Dict]:
         """
         获取游戏评价（异步版本）- 极速版
         
@@ -73,80 +81,115 @@ class TapTapCrawler:
             url += "?sort=new"
         
         logger.info(f"开始爬取: {url} (排序: {sort})")
-        
-        await self.page.goto(url, wait_until='domcontentloaded')
-        await self.page.wait_for_selector('.review-item', timeout=10000)
+
+        await self.page.goto(url, wait_until='domcontentloaded', timeout=30000)
+
+        try:
+            await self.page.wait_for_selector('.review-item', timeout=15000)
+            await self.page.wait_for_timeout(1200)
+        except Exception as e:
+            logger.warning(f"等待评论元素超时: {e}")
+            return []
         
         reviews = []
         seen_ids = set()
         scroll_count = 0
-        max_scrolls = (max_reviews // 10) + 50
+        target_reviews = max_reviews if isinstance(max_reviews, int) and max_reviews > 0 else 10 ** 9
+        max_scrolls = (max_reviews // 10) + 200 if isinstance(max_reviews, int) and max_reviews > 0 else 3000
         last_count = 0
         stall_count = 0
+        stop_by_since = False
+        last_heartbeat_ts = time.time()
         
-        while len(reviews) < max_reviews and scroll_count < max_scrolls:
-            new_reviews = await self._parse_reviews()
-            
+        while len(reviews) < target_reviews and scroll_count < max_scrolls:
+            if callable(stop_checker) and stop_checker():
+                logger.info("收到停止信号，结束当前爬取循环")
+                break
+            new_reviews = await self._parse_reviews(seen_ids)
+            page_visible_count = len(new_reviews)
+
             for review in new_reviews:
                 if review['review_id'] not in seen_ids:
+                    if since_date and review['review_date'] and review['review_date'] < since_date:
+                        logger.info(f"遇到 {review['review_date']} 的评价，停止爬取（since: {since_date}）")
+                        stop_by_since = True
+                        break
                     seen_ids.add(review['review_id'])
                     reviews.append(review)
+            if stop_by_since:
+                break
+
+            if since_date:
+                has_old = any(r['review_date'] and r['review_date'] < since_date for r in reviews)
+                if has_old:
+                    break
             
             current_count = len(reviews)
             
             if current_count > last_count:
                 last_count = current_count
+                if callable(progress_callback):
+                    progress_callback(current_count)
                 stall_count = 0
-                if current_count % 100 == 0:
-                    logger.info(f"已获取 {current_count} 条评价")
+                if current_count % 40 == 0:
+                    logger.info(f"进度: 已获取 {current_count} 条评价, 滚动 {scroll_count}/{max_scrolls}")
             else:
                 stall_count += 1
+                if scroll_count % 5 == 0:
+                    logger.info(f"进度: 当前 {current_count} 条, 页面可见 {page_visible_count} 条, 连续无增长 {stall_count} 次")
+            now_ts = time.time()
+            if now_ts - last_heartbeat_ts >= 20:
+                logger.info(f"心跳: 当前 {current_count} 条, 滚动 {scroll_count}/{max_scrolls}, 连续无增长 {stall_count} 次")
+                last_heartbeat_ts = now_ts
             
-            if current_count >= max_reviews:
+            if current_count >= target_reviews:
                 break
             
-            if stall_count >= 8:
+            if stall_count >= 20:
                 logger.info(f"连续{stall_count}次无新评价，停止爬取")
                 break
             
-            await self.page.evaluate("window.scrollBy(0, 5000);")
-            
             try:
-                await self.page.wait_for_function(
-                    f"() => document.querySelectorAll('.review-item').length > {current_count}",
-                    timeout=3000
-                )
-            except:
-                pass
-            
+                prev_dom_count = len(await self.page.query_selector_all('.review-item'))
+                await self.page.evaluate("window.scrollBy(0, 5000);")
+                for _ in range(4):
+                    await self.page.wait_for_timeout(1200)
+                    new_dom_count = len(await self.page.query_selector_all('.review-item'))
+                    if new_dom_count > prev_dom_count:
+                        break
+            except Exception as e:
+                logger.warning(f"滚动页面失败: {e}")
+                break
+
             scroll_count += 1
         
         logger.info(f"爬取完成，共 {len(reviews)} 条评价")
-        return reviews[:max_reviews]
+        return reviews[:max_reviews] if isinstance(max_reviews, int) and max_reviews > 0 else reviews
     
-    def get_reviews(self, game_id: int, max_reviews: int = 100, sort: str = 'default') -> List[Dict]:
-        """
-        获取游戏评价（同步版本）
-        
-        Args:
-            game_id: 游戏ID
-            max_reviews: 最大评价数量
-            sort: 排序方式 ('default' 或 'new')
-        
-        Returns:
-            List[Dict]: 评价列表
-        """
-        return asyncio.run(self.get_reviews_async(game_id, max_reviews, sort))
+    def get_reviews(
+        self,
+        game_id: int,
+        max_reviews: Optional[int] = None,
+        sort: str = 'default',
+        since_date: str = None,
+        stop_checker: Optional[Callable[[], bool]] = None,
+        progress_callback: Optional[Callable[[int], None]] = None
+    ) -> List[Dict]:
+        return asyncio.run(self.get_reviews_async(game_id, max_reviews, sort, since_date, stop_checker, progress_callback))
     
-    async def _parse_reviews(self) -> List[Dict]:
+    async def _parse_reviews(self, processed_ids: Optional[set] = None) -> List[Dict]:
         """解析页面上的评价"""
         reviews = []
+        processed_ids = processed_ids or set()
         
         try:
             review_elements = await self.page.query_selector_all('.review-item')
             
             for elem in review_elements:
                 try:
+                    review_id = await elem.get_attribute('data-id')
+                    if review_id and review_id in processed_ids:
+                        continue
                     review = await self._parse_single_review(elem)
                     if review:
                         reviews.append(review)
@@ -182,7 +225,7 @@ class TapTapCrawler:
                     continue
             
             if not user_name:
-                user_name = '匿名用户'
+                return None
             
             # 内容 - 获取 collapse-text-emoji__content 元素的 innerText
             content = ''
@@ -206,6 +249,8 @@ class TapTapCrawler:
             
             # 获取日期
             review_date = await self._extract_date(elem)
+            if rating is None or not review_date:
+                return None
             
             if not content or len(content) < 5:
                 return None
@@ -226,7 +271,7 @@ class TapTapCrawler:
             logger.debug(f"解析评价失败: {e}")
             return None
     
-    async def _extract_rating(self, elem: ElementHandle) -> int:
+    async def _extract_rating(self, elem: ElementHandle) -> Optional[int]:
         """提取星级评分"""
         try:
             highlight = await elem.query_selector('.review-rate__highlight')
@@ -240,9 +285,9 @@ class TapTapCrawler:
                         return max(1, min(5, rating))
         except:
             pass
-        return 5
+        return None
     
-    async def _extract_date(self, elem: ElementHandle) -> str:
+    async def _extract_date(self, elem: ElementHandle) -> Optional[str]:
         """
         提取评价日期 - 完全复刻老爬虫逻辑
         
@@ -322,7 +367,7 @@ class TapTapCrawler:
         except Exception as e:
             logger.debug(f"日期解析失败: {e}")
         
-        return datetime.now().strftime('%Y-%m-%d')
+        return None
     
     def _clean_content(self, content: str, user_name: str) -> str:
         """清理评价内容"""

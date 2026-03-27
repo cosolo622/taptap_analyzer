@@ -20,8 +20,7 @@ from models.platform import Platform
 from sqlalchemy import and_, not_
 
 # 导入AI分析器
-from nlp.glm_analyzer import GLMAnalyzer
-from nlp.token_tracker import TokenTracker
+from nlp.glm_analyzer import AliyunAnalyzer, TokenTracker
 
 # 导入爬虫
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'scripts'))
@@ -81,7 +80,7 @@ class SchedulerService:
         self.scheduler = AsyncIOScheduler()
         self.logger = TaskLogger()
         self.token_tracker = TokenTracker()
-        self.analyzer = GLMAnalyzer(token_tracker=self.token_tracker)
+        self.analyzer = AliyunAnalyzer(token_tracker=self.token_tracker)
         self.crawler = None
         self.db = None
         
@@ -162,7 +161,7 @@ class SchedulerService:
             # 获取数据库中最新的评价日期
             db = SessionLocal()
             try:
-                latest = db.query(Review).order_by(Review.review_date.desc()).first()
+                latest = db.query(Review).filter(Review.review_date.isnot(None)).order_by(Review.review_date.desc()).first()
                 since_date = latest.review_date if latest else None
             finally:
                 db.close()
@@ -207,8 +206,23 @@ class SchedulerService:
         try:
             saved = 0
             for r in reviews:
-                # 检查是否已存在
-                existing = db.query(Review).filter(Review.review_id == r['review_id']).first()
+                user_name = (r.get('user_name') or '').strip()
+                content = (r.get('content') or '').strip()
+                review_date = datetime.strptime(r['review_date'], '%Y-%m-%d').date() if r.get('review_date') else None
+                if not user_name or not content:
+                    continue
+                existing_query = db.query(Review).filter(
+                    Review.product_id == 1,
+                    Review.platform_id == 1,
+                    Review.user_name == user_name,
+                    Review.content == content
+                )
+                if review_date:
+                    existing = existing_query.filter(
+                        (Review.review_date == review_date) | (Review.review_date.is_(None))
+                    ).first()
+                else:
+                    existing = existing_query.first()
                 if existing:
                     continue
                 
@@ -216,14 +230,14 @@ class SchedulerService:
                 review = Review(
                     product_id=1,  # 鹅鸭杀
                     platform_id=1,  # TapTap
-                    review_id=r['review_id'],
-                    user_name=r.get('user_name'),
-                    content=r.get('content'),
+                    review_id=r.get('review_id'),
+                    user_name=user_name,
+                    content=content,
                     rating=r.get('rating'),
                     sentiment=r['sentiment'],
                     problem_category=r['problem_category'],
                     summary=r['summary'],
-                    review_date=datetime.strptime(r['review_date'], '%Y-%m-%d').date() if r.get('review_date') else None,
+                    review_date=review_date,
                     crawl_date=datetime.now()
                 )
                 db.add(review)

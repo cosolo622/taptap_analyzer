@@ -73,6 +73,7 @@
                 <el-icon><Search /></el-icon>
               </template>
             </el-input>
+            <el-button style="margin-left: 10px;" @click="refreshData">刷新数据</el-button>
             <span class="result-count">共 {{ filteredReviews.length }} 条结果</span>
           </div>
         </el-col>
@@ -163,6 +164,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { Search } from '@element-plus/icons-vue'
 
 const props = defineProps(['data'])
+const emit = defineEmits(['refresh'])
 
 const dateRange = ref([])
 const selectedMainCategory = ref('')
@@ -279,6 +281,10 @@ const getSentimentType = (sentiment) => {
 
 const handleFilter = () => {
   currentPage.value = 1
+}
+
+const refreshData = () => {
+  emit('refresh')
 }
 
 const handleSortChange = ({ prop, order }) => {

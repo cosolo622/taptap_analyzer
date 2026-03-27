@@ -10,6 +10,19 @@
           <el-select v-model="selectedProduct" placeholder="选择产品" style="width: 180px" @change="loadData">
             <el-option v-for="product in products" :key="product.id" :label="product.name" :value="product.id" />
           </el-select>
+          <el-button v-if="!isAdmin" type="warning" size="small" @click="adminDialogVisible = true">管理员登录</el-button>
+          <el-dropdown v-else @command="handleAdminCommand">
+            <el-button type="primary" size="small">
+              管理员选项<el-icon class="el-icon--right"><arrow-down /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item command="manual">使用指南</el-dropdown-item>
+                <el-dropdown-item command="intro">产品简介</el-dropdown-item>
+                <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
           <span class="update-time">更新时间: {{ updateTime }}</span>
           <el-badge :value="alertCount" :hidden="alertCount === 0" class="alert-badge">
             <el-button :icon="Bell" circle @click="handleAlertClick" />
@@ -63,19 +76,64 @@
                 <el-icon><Monitor /></el-icon>
                 <span>系统监控</span>
               </el-menu-item>
+              <el-menu-item index="database">
+                <el-icon><Grid /></el-icon>
+                <span>数据库管理</span>
+              </el-menu-item>
               <el-menu-item index="products">
                 <el-icon><Setting /></el-icon>
                 <span>产品管理</span>
               </el-menu-item>
             </el-sub-menu>
             
-            <el-sub-menu index="xiaohongshu" disabled>
+            <el-sub-menu index="xiaohongshu">
               <template #title>
                 <el-icon><PictureFilled /></el-icon>
                 <span>小红书监控</span>
               </template>
-              <el-menu-item index="xhs-placeholder" disabled>
-                <span style="color: #909399;">开发中...</span>
+              <el-menu-item index="xhs-realtime">
+                <el-icon><TrendCharts /></el-icon>
+                <span>实时舆情数据</span>
+              </el-menu-item>
+              <el-menu-item index="xhs-wordcloud">
+                <el-icon><Cloudy /></el-icon>
+                <span>词云分析</span>
+              </el-menu-item>
+              <el-menu-item index="xhs-trends">
+                <el-icon><DataAnalysis /></el-icon>
+                <span>情感和主题趋势</span>
+              </el-menu-item>
+              <el-menu-item index="xhs-hotspot">
+                <el-icon><Odometer /></el-icon>
+                <span>社区热点</span>
+              </el-menu-item>
+              <el-menu-item index="xhs-summary">
+                <el-icon><Document /></el-icon>
+                <span>每日摘要</span>
+              </el-menu-item>
+              <el-menu-item index="xhs-content">
+                <el-icon><Notebook /></el-icon>
+                <span>社媒内容</span>
+              </el-menu-item>
+              <el-menu-item index="xhs-kol">
+                <el-icon><User /></el-icon>
+                <span>KOL发现</span>
+              </el-menu-item>
+              <el-menu-item index="xhs-risk">
+                <el-icon><Warning /></el-icon>
+                <span>风控预警</span>
+              </el-menu-item>
+              <el-menu-item index="xhs-config">
+                <el-icon><Setting /></el-icon>
+                <span>产品配置</span>
+              </el-menu-item>
+              <el-menu-item index="xhs-dataupdate">
+                <el-icon><Refresh /></el-icon>
+                <span>数据更新</span>
+              </el-menu-item>
+              <el-menu-item index="xhs-database">
+                <el-icon><Grid /></el-icon>
+                <span>数据库管理</span>
               </el-menu-item>
             </el-sub-menu>
           </el-menu>
@@ -85,15 +143,41 @@
           <RealtimeData v-if="activeMenu === 'realtime'" :data="data" @refresh="loadData" />
           <NegativeMonitor v-else-if="activeMenu === 'negative'" :data="data" />
           <WordCloud v-else-if="activeMenu === 'wordcloud'" :data="data" />
-          <Reviews v-else-if="activeMenu === 'reviews'" :data="data" />
+          <Reviews v-else-if="activeMenu === 'reviews'" :data="data" @refresh="loadData" />
           <AnalysisReport v-else-if="activeMenu === 'report'" :data="data" />
           <AlertSettings v-else-if="activeMenu === 'alert'" :data="data" @alert-change="handleAlertChange" />
-          <DataUpdate v-else-if="activeMenu === 'dataupdate'" @refresh="loadData" />
-          <SystemMonitor v-else-if="activeMenu === 'monitor'" />
+          <DataUpdate v-else-if="activeMenu === 'dataupdate' && isAdmin" @refresh="loadData" />
+          <SystemMonitor v-else-if="activeMenu === 'monitor' && isAdmin" />
+          <DatabaseManage v-else-if="activeMenu === 'database' && isAdmin" />
+          <el-result
+            v-else-if="['dataupdate','monitor','database'].includes(activeMenu)"
+            icon="warning"
+            title="需要管理员登录"
+            sub-title="数据更新、系统监控、数据库管理仅管理员可操作"
+          >
+            <template #extra>
+              <el-button type="primary" @click="adminDialogVisible = true">立即登录</el-button>
+            </template>
+          </el-result>
           <ProductManage v-else-if="activeMenu === 'products'" @product-change="handleProductChange" />
+          <XhsCommunity v-else-if="activeMenu.startsWith('xhs-')" :module="activeMenu" />
         </el-main>
       </el-container>
     </el-container>
+
+    <el-dialog v-model="adminDialogVisible" title="管理员登录" width="420px">
+      <el-input
+        v-model="adminPassword"
+        type="password"
+        show-password
+        placeholder="请输入管理员密码"
+        @keyup.enter="loginAdmin"
+      />
+      <template #footer>
+        <el-button @click="adminDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="adminLoading" @click="loginAdmin">登录</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -101,7 +185,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { 
   DataAnalysis, Monitor, Odometer, TrendCharts, Warning, 
-  Cloudy, Document, Bell, PictureFilled, Notebook, Refresh, Setting
+  Cloudy, Document, Bell, PictureFilled, Notebook, Refresh, Setting, Grid, ArrowDown, User
 } from '@element-plus/icons-vue'
 import RealtimeData from './views/RealtimeData.vue'
 import NegativeMonitor from './views/NegativeMonitor.vue'
@@ -112,6 +196,10 @@ import AlertSettings from './views/AlertSettings.vue'
 import DataUpdate from './views/DataUpdate.vue'
 import SystemMonitor from './views/SystemMonitor.vue'
 import ProductManage from './views/ProductManage.vue'
+import DatabaseManage from './views/DatabaseManage.vue'
+import XhsCommunity from './views/XhsCommunity.vue'
+import { ElMessage } from 'element-plus'
+import api from './api'
 
 const activeMenu = ref('realtime')
 const selectedProduct = ref(null)
@@ -119,6 +207,10 @@ const products = ref([])
 const updateTime = ref('')
 const data = ref(null)
 const alertRules = ref([])
+const isAdmin = ref(false)
+const adminDialogVisible = ref(false)
+const adminPassword = ref('')
+const adminLoading = ref(false)
 const hasAlert = computed(() => alertRules.value.some(rule => rule.triggered))
 const alertCount = computed(() => alertRules.value.filter(rule => rule.triggered).length)
 
@@ -136,6 +228,56 @@ const handleAlertChange = (rules) => {
 
 const handleProductChange = () => {
   loadProducts()
+}
+
+const loginAdmin = async () => {
+  if (!adminPassword.value) {
+    ElMessage.warning('请输入管理员密码')
+    return
+  }
+  adminLoading.value = true
+  try {
+    const res = await api.post('/admin/login', { password: adminPassword.value })
+    localStorage.setItem('adminToken', res.data.token)
+    isAdmin.value = true
+    adminDialogVisible.value = false
+    adminPassword.value = ''
+    ElMessage.success('管理员登录成功')
+  } catch (error) {
+    ElMessage.error('登录失败：' + (error.response?.data?.detail || error.message))
+  } finally {
+    adminLoading.value = false
+  }
+}
+
+const checkAdmin = async () => {
+  try {
+    const res = await api.get('/admin/status')
+    isAdmin.value = !!res.data.logged_in
+  } catch {
+    isAdmin.value = false
+  }
+}
+
+const handleAdminCommand = (command) => {
+  if (command === 'logout') {
+    logoutAdmin()
+  } else if (command === 'manual') {
+    activeMenu.value = 'xhs-manual' // 或展示弹窗/跳转新页面
+    ElMessage.info('正在打开使用指南')
+  } else if (command === 'intro') {
+    activeMenu.value = 'xhs-intro'
+    ElMessage.info('正在打开产品简介')
+  }
+}
+
+const logoutAdmin = async () => {
+  try {
+    await api.post('/admin/logout')
+  } catch {}
+  localStorage.removeItem('adminToken')
+  isAdmin.value = false
+  ElMessage.success('已退出管理员')
 }
 
 const loadProducts = async () => {
@@ -179,6 +321,7 @@ const loadAlertRules = () => {
 }
 
 onMounted(async () => {
+  await checkAdmin()
   await loadProducts()
   await loadData()
   loadAlertRules()

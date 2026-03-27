@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 数据库连接配置
-支持 SQLite（本地开发）和 PostgreSQL（生产环境）
+仅支持 PostgreSQL
 """
 
 import os
@@ -20,9 +20,11 @@ DATABASE_URL = os.getenv(
     'postgresql://postgres:12357951@localhost:5432/public_opinion'
 )
 
+if not DATABASE_URL.startswith('postgresql'):
+    raise ValueError('当前项目仅支持 PostgreSQL，请设置 DATABASE_URL 为 postgresql://...')
+
 engine = create_engine(
     DATABASE_URL,
-    connect_args={"check_same_thread": False} if DATABASE_URL.startswith('sqlite') else {},
     echo=False
 )
 
@@ -47,6 +49,6 @@ def init_db():
     """
     初始化数据库（创建所有表）
     """
-    from . import Product, Platform, Review, CrawlLog
+    from . import Product, Platform, Review, CrawlLog, CommunityContent, ContentAITags
     Base.metadata.create_all(bind=engine)
     print(f"数据库初始化完成: {DATABASE_URL}")

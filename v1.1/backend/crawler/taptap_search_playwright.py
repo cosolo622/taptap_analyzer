@@ -169,7 +169,25 @@ class TapTapSearcherPlaywright:
         finally:
             await self._close_browser()
         
-        return results
+        keyword_norm = re.sub(r'\s+', '', keyword).lower()
+        scored_results = []
+        for item in results:
+            name_norm = re.sub(r'\s+', '', item.get('name', '')).lower()
+            score = 0
+            if name_norm == keyword_norm:
+                score += 100
+            if keyword_norm and keyword_norm in name_norm:
+                score += 60
+            for token in re.split(r'[\s·\-_/]+', keyword_norm):
+                if token and token in name_norm:
+                    score += 10
+            scored_results.append((score, item))
+
+        scored_results.sort(key=lambda x: (x[0], x[1].get('rating', 0)), reverse=True)
+        strict_results = [item for score, item in scored_results if score >= 60]
+        if strict_results:
+            return strict_results[:max_results]
+        return [item for _, item in scored_results][:max_results]
     
     def search(self, keyword: str, max_results: int = 10) -> list:
         """
